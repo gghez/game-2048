@@ -24,7 +24,9 @@
     <string name="fast_anim_title">Accélérer les animations</string>
     <string name="fast_anim_desc">Enchaînez les combos plus rapidement.</string>
     <string name="vibration_title">Activer les vibrations</string>
-    <string name="vibration_desc">Vibration surprise pour un 2048.</string>
+    <string name="vibration_desc">Une vibration à chaque déplacement.</string>
+    <string name="sound_title">Activer le son</string>
+    <string name="sound_desc">Un petit bruit à chaque déplacement.</string>
     <string name="orientation_portrait">Portrait</string>
     <string name="orientation_auto">Auto</string>
     <string name="orientation_landscape">Landscape</string>

@@ -15,6 +15,7 @@ class SettingsRepository(private val context: Context) {
         val THEME = stringPreferencesKey("theme")
         val FAST = booleanPreferencesKey("fast_animations")
         val VIBRATION = booleanPreferencesKey("vibration")
+        val SOUND = booleanPreferencesKey("sound")
         val ORIENTATION = stringPreferencesKey("orientation")
     }
 
@@ -23,6 +24,7 @@ class SettingsRepository(private val context: Context) {
             theme = p[Keys.THEME]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.LIGHT,
             fastAnimations = p[Keys.FAST] ?: false,
             vibration = p[Keys.VIBRATION] ?: false,
+            sound = p[Keys.SOUND] ?: true,
             orientation = p[Keys.ORIENTATION]?.let { runCatching { OrientationMode.valueOf(it) }.getOrNull() } ?: OrientationMode.PORTRAIT,
         )
     }
@@ -37,6 +39,10 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setVibration(on: Boolean) {
         context.settingsDataStore.edit { it[Keys.VIBRATION] = on }
+    }
+
+    suspend fun setSound(on: Boolean) {
+        context.settingsDataStore.edit { it[Keys.SOUND] = on }
     }
 
     suspend fun setOrientation(mode: OrientationMode) {

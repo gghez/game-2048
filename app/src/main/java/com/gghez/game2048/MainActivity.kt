@@ -65,6 +65,7 @@ class MainActivity : ComponentActivity() {
                         onTheme = viewModel::setTheme,
                         onFast = viewModel::setFast,
                         onVibration = viewModel::setVibration,
+                        onSound = viewModel::setSound,
                         onOrientation = viewModel::setOrientation,
                         onDismiss = { showSettings = false },
                     )

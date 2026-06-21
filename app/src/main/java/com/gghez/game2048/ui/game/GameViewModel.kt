@@ -15,6 +15,7 @@ import com.gghez.game2048.data.settings.GameSettings
 import com.gghez.game2048.data.settings.OrientationMode
 import com.gghez.game2048.data.settings.SettingsRepository
 import com.gghez.game2048.data.settings.ThemeMode
+import com.gghez.game2048.feedback.GameFeedback
 import com.gghez.game2048.domain.Board
 import com.gghez.game2048.domain.Direction
 import com.gghez.game2048.domain.GameEngine
@@ -43,6 +44,7 @@ class GameViewModel(
     private val settingsRepo: SettingsRepository,
     private val scoreRepo: ScoreRepository,
     private val leaderboard: LeaderboardRepository,
+    private val feedback: GameFeedback,
 ) : ViewModel() {
 
     private val engine = GameEngine()
@@ -122,6 +124,13 @@ class GameViewModel(
         val result = engine.move(current, dir)
         if (!result.moved) return
         previous = current
+        // Feedback on a valid move: a stronger cue when something merged.
+        val settings = _ui.value.settings
+        if (result.gained > 0) {
+            feedback.onMerge(settings.vibration, settings.sound)
+        } else {
+            feedback.onMove(settings.vibration, settings.sound)
+        }
         val spawned = engine.spawn(result.state, spawner, ::nextId)
         _ui.value = _ui.value.copy(state = spawned, canUndo = true)
         viewModelScope.launch {
@@ -169,9 +178,15 @@ class GameViewModel(
     fun setTheme(m: ThemeMode) = viewModelScope.launch { settingsRepo.setTheme(m) }.let { }
     fun setFast(on: Boolean) = viewModelScope.launch { settingsRepo.setFastAnimations(on) }.let { }
     fun setVibration(on: Boolean) = viewModelScope.launch { settingsRepo.setVibration(on) }.let { }
+    fun setSound(on: Boolean) = viewModelScope.launch { settingsRepo.setSound(on) }.let { }
     fun setOrientation(m: OrientationMode) = viewModelScope.launch { settingsRepo.setOrientation(m) }.let { }
 
     fun showLeaderboards(activity: Activity) = leaderboard.showLeaderboards(activity)
+
+    override fun onCleared() {
+        feedback.release()
+        super.onCleared()
+    }
 
     private suspend fun submitScores(s: GameState) {
         leaderboard.submit(LeaderboardKind.SPEED, s.score.toLong())
@@ -201,6 +216,7 @@ class GameViewModel(
                     app.container.settingsRepo,
                     app.container.scoreRepo,
                     app.container.leaderboard,
+                    app.container.feedback,
                 )
             }
         }

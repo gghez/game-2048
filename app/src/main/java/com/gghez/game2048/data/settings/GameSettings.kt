@@ -7,5 +7,6 @@ data class GameSettings(
     val theme: ThemeMode = ThemeMode.LIGHT,
     val fastAnimations: Boolean = false,
     val vibration: Boolean = false,
+    val sound: Boolean = true,
     val orientation: OrientationMode = OrientationMode.PORTRAIT,
 )
