@@ -1,0 +1,132 @@
+package com.gghez.game2048.ui.game
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.gghez.game2048.R
+import com.gghez.game2048.data.settings.ThemeMode
+import com.gghez.game2048.domain.Direction
+import com.gghez.game2048.domain.GameStatus
+import com.gghez.game2048.ui.components.GameGrid
+import com.gghez.game2048.ui.components.NewGameDialog
+import com.gghez.game2048.ui.components.ScoreCard
+
+@Composable
+fun GameScreen(
+    ui: GameUiState,
+    onSwipe: (Direction) -> Unit,
+    onNewGame: () -> Unit,
+    onConfirmNewGame: () -> Unit,
+    onDismissDialog: () -> Unit,
+    onUndo: () -> Unit,
+    onContinue: () -> Unit,
+    onOpenSettings: () -> Unit,
+    onOpenLeaderboard: () -> Unit,
+) {
+    val dark = ui.settings.theme == ThemeMode.DARK
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp),
+    ) {
+        // Header
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Text("2048", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.weight(1f))
+            IconButton(onClick = onOpenLeaderboard) { Icon(Icons.Default.EmojiEvents, stringResource(R.string.cd_leaderboard)) }
+            IconButton(onClick = onNewGame) { Icon(Icons.Default.Refresh, stringResource(R.string.cd_restart)) }
+            IconButton(onClick = onOpenSettings) { Icon(Icons.Default.Settings, stringResource(R.string.cd_settings)) }
+        }
+        Spacer(Modifier.height(8.dp))
+        // Score row
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            ScoreCard(stringResource(R.string.score), ui.state.score, highlighted = true, modifier = Modifier.weight(1f))
+            ScoreCard(stringResource(R.string.best_score), ui.bestScore, highlighted = false, modifier = Modifier.weight(1f))
+        }
+        Spacer(Modifier.weight(1f))
+        // Grid with win/over overlay
+        Box(Modifier.fillMaxWidth()) {
+            GameGrid(
+                board = ui.state.board,
+                dark = dark,
+                fastAnimations = ui.settings.fastAnimations,
+                onSwipe = onSwipe,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            when (ui.state.status) {
+                GameStatus.WON -> Overlay(stringResource(R.string.you_win)) {
+                    TextButton(onClick = onContinue) { Text(stringResource(R.string.continue_playing)) }
+                    TextButton(onClick = onConfirmNewGame) { Text(stringResource(R.string.start)) }
+                }
+                GameStatus.LOST -> Overlay(stringResource(R.string.game_over)) {
+                    TextButton(onClick = onConfirmNewGame) { Text(stringResource(R.string.start)) }
+                }
+                GameStatus.PLAYING -> {}
+            }
+        }
+        Spacer(Modifier.weight(1f))
+        // Footer
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(formatTime(ui.elapsedSeconds), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            Spacer(Modifier.weight(1f))
+            if (ui.canUndo) {
+                IconButton(onClick = onUndo) { Icon(Icons.AutoMirrored.Filled.Undo, stringResource(R.string.undo)) }
+            }
+            Text("${ui.state.moves} ${stringResource(R.string.moves_suffix)}", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+        }
+    }
+    if (ui.showNewGameDialog) NewGameDialog(onConfirm = onConfirmNewGame, onDismiss = onDismissDialog)
+}
+
+@Composable
+private fun BoxScope.Overlay(title: String, actions: @Composable () -> Unit) {
+    Box(
+        Modifier
+            .matchParentSize()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.85f)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(title, style = MaterialTheme.typography.titleLarge)
+            actions()
+        }
+    }
+}
+
+private fun formatTime(seconds: Long): String {
+    val m = seconds / 60
+    val s = seconds % 60
+    return "%02d:%02d".format(m, s)
+}
