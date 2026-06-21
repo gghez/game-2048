@@ -25,22 +25,48 @@ class GameEngine {
         return merged to gained
     }
 
-    /** Applies a move (no spawn). Status recomputed for win; loss handled after spawn. */
+    /**
+     * Applies a move (no spawn), preserving tile identity so the UI can animate
+     * sliding. A tile that only slides keeps its id; a merge produces a tile that
+     * reuses the surviving tile's id (with the doubled value), and the absorbed
+     * tile simply disappears. Status recomputed for win; loss handled after spawn.
+     */
     fun move(state: GameState, dir: Direction): MoveResult {
-        val grid = state.board.values()
-        val lines = extractLines(grid, dir)
+        val cells = state.board.cells
+        val newCells = arrayOfNulls<Tile>(SIZE * SIZE)
         var gained = 0
-        val newLines = lines.map { line ->
-            val (slid, g) = slideLine(line)
-            gained += g
-            slid
+
+        for (lineIdx in 0 until SIZE) {
+            // Collect tiles along the line, ordered from the destination edge (j=0).
+            val lineTiles = ArrayList<Tile>(SIZE)
+            for (j in 0 until SIZE) {
+                cells[indexFor(dir, lineIdx, j)]?.let { lineTiles.add(it) }
+            }
+            // Slide + merge, keeping ids (survivor's id is reused on a merge).
+            val output = ArrayList<Tile>(SIZE)
+            var i = 0
+            while (i < lineTiles.size) {
+                if (i + 1 < lineTiles.size && lineTiles[i].value == lineTiles[i + 1].value) {
+                    val mergedValue = lineTiles[i].value * 2
+                    output.add(Tile(lineTiles[i].id, mergedValue))
+                    gained += mergedValue
+                    i += 2
+                } else {
+                    output.add(lineTiles[i])
+                    i += 1
+                }
+            }
+            for (k in output.indices) {
+                newCells[indexFor(dir, lineIdx, k)] = output[k]
+            }
         }
-        val newGrid = restoreLines(newLines, dir)
-        val moved = newGrid != grid
+
+        val newCellList = newCells.toList()
+        val moved = newCellList.map { it?.value ?: 0 } != state.board.values()
         if (!moved) return MoveResult(state, moved = false, gained = 0)
 
-        val board = gridToBoard(newGrid)
-        val won = newGrid.any { it >= WIN_VALUE }
+        val board = Board(newCellList)
+        val won = newCellList.any { (it?.value ?: 0) >= WIN_VALUE }
         val status = when {
             won && !state.keepPlaying -> GameStatus.WON
             else -> GameStatus.PLAYING
@@ -84,27 +110,6 @@ class GameEngine {
             }
         }
         return false
-    }
-
-    private fun gridToBoard(grid: List<Int>): Board =
-        Board(grid.mapIndexed { i, v -> if (v == 0) null else Tile(i, v) })
-
-    /** Extracts 4 lines oriented so that sliding toward index 0 equals moving in [dir]. */
-    private fun extractLines(grid: List<Int>, dir: Direction): List<List<Int>> =
-        (0 until SIZE).map { idx ->
-            (0 until SIZE).map { j ->
-                grid[indexFor(dir, idx, j)]
-            }
-        }
-
-    private fun restoreLines(lines: List<List<Int>>, dir: Direction): List<Int> {
-        val out = MutableList(SIZE * SIZE) { 0 }
-        for (idx in 0 until SIZE) {
-            for (j in 0 until SIZE) {
-                out[indexFor(dir, idx, j)] = lines[idx][j]
-            }
-        }
-        return out
     }
 
     /**
