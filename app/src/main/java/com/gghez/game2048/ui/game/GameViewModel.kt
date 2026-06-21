@@ -30,6 +30,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+/**
+ * Owns the authoritative game state and exposes it as a single immutable
+ * [GameUiState] via [ui]. The UI is a pure function of that snapshot; all events
+ * (swipe, undo, new game, settings) flow back through this class.
+ *
+ * Responsibilities: run the engine, generate stable tile ids, keep one-level undo,
+ * tick the timer, persist best score + the in-progress game, and submit scores to
+ * the leaderboard when a game ends.
+ */
 class GameViewModel(
     private val settingsRepo: SettingsRepository,
     private val scoreRepo: ScoreRepository,
@@ -38,9 +47,10 @@ class GameViewModel(
 
     private val engine = GameEngine()
     private val spawner = RandomTileSpawner()
+    // Monotonic source of tile ids; new tiles get a fresh id, ensuring uniqueness.
     private var idCounter = 0
     private fun nextId(): Int = idCounter++
-    private var previous: GameState? = null
+    private var previous: GameState? = null // snapshot for single-level undo
     private var timerJob: Job? = null
     private var paused = false
 

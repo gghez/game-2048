@@ -1,4 +1,4 @@
-# game-2048 — Project Vision & Stack
+# game-2048 — Vision & Architectural Stance
 
 ## Vision (non-negotiable)
 
@@ -16,36 +16,36 @@ purpose of this project and must be rejected.
 ## Stack
 
 - Kotlin + Jetpack Compose (Material 3), single-Activity, MVVM.
-- Pure, framework-free domain engine (`domain/`), unit-tested (TDD).
-- DataStore (Preferences) for settings, best score, and saved game.
-- Google Play Games Services v2 for leaderboards (optional; app runs without it).
+- Coroutines + `StateFlow` for state; DataStore (Preferences) for persistence.
+- Google Play Games Services v2 for leaderboards (optional).
 - Gradle (Kotlin DSL). Min SDK 24, Target/Compile SDK 35, Java 17.
+
+## Architectural stance (the "why")
+
+- **Pure domain core.** Game rules live in `domain/`, free of any Android import,
+  so they are fast to unit-test and impossible to couple to the UI.
+- **Stable tile identity.** A tile keeps its id while it slides; a merge reuses the
+  surviving tile's id. This identity is what lets the UI animate movement instead
+  of redrawing — the rendering choice depends on this domain guarantee.
+- **Deterministic by injection.** Randomness (tile spawning) is injected, so the
+  engine is reproducible and testable with a seed.
+- **Leaderboard behind an interface.** A Noop fallback keeps the app fully playable
+  with no Google Play Console account; the real implementation is opt-in.
+- **Manual, minimal DI.** A small container created in the Application — no DI
+  framework — to keep the dependency surface tiny.
+- **Settings-driven theme.** Light/dark follows the in-app setting, not the system,
+  to match the explicit selector in the design.
 
 ## Conventions
 
-- Code/docs/comments in English; user-facing strings in French (`res/values/strings.xml`).
+- Code, docs, and comments in English; user-facing strings in French
+  (`res/values/strings.xml`), accents included.
 - No paid or tracking dependencies, ever.
 - Domain logic stays Android-free and unit-tested.
 
-## Build & test
+## Where to look
 
-- `./gradlew testDebugUnitTest` — run the domain unit tests.
-- `./gradlew assembleDebug` — produce `app/build/outputs/apk/debug/app-debug.apk`.
-- `adb install -r app/build/outputs/apk/debug/app-debug.apk` — install on a device.
-
-## Google Play Games (optional)
-
-Leaderboards are disabled by default so the app builds and runs without a Play
-Console account. To enable them:
-
-1. Add your ids to `local.properties` (never committed):
-   ```
-   playGamesAppId=1234567890
-   leaderboardSpeed=CgkI...speed
-   leaderboardEfficiency=CgkI...efficiency
-   ```
-2. Uncomment the `com.google.android.gms.games.APP_ID` meta-data in
-   `app/src/main/AndroidManifest.xml`.
-
-Two leaderboards mirror the design: **Vitesse d'exécution** (best score) and
-**Optimisation des déplacements** (best tile reached).
+- Build, run, and Play Games setup: `README.md`.
+- Detailed architecture and design decisions: `docs/ARCHITECTURE.md`.
+- Module-specific stances: nested `CLAUDE.md` in `domain/`, `data/`, `ui/`.
+- Path-scoped rules Claude must follow: `.claude/rules/`.

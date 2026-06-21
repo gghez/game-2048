@@ -9,3 +9,6 @@ build/
 local.properties
 *.keystore
 !debug.keystore
+
+# Claude Code worktrees (created locally by the agent harness)
+/.claude/worktrees/
