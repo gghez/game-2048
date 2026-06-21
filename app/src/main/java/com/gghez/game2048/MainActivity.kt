@@ -1,14 +1,15 @@
 package com.gghez.game2048
 
-import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,7 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.gghez.game2048.data.settings.OrientationMode
 import com.gghez.game2048.data.settings.ThemeMode
 import com.gghez.game2048.ui.game.GameScreen
 import com.gghez.game2048.ui.game.GameViewModel
@@ -37,17 +37,20 @@ class MainActivity : ComponentActivity() {
             val ui by viewModel.ui.collectAsStateWithLifecycle()
             val dark = ui.settings.theme == ThemeMode.DARK
 
-            LaunchedEffect(ui.settings.orientation) {
-                applyOrientation(ui.settings.orientation)
-            }
-
             var showSettings by remember { mutableStateOf(false) }
 
             Game2048Theme(darkTheme = dark) {
-                androidx.compose.foundation.layout.Box(
-                    Modifier.windowInsetsPadding(WindowInsets.systemBars),
+                // Surface paints the themed background edge-to-edge and, crucially,
+                // sets the default content color (onBackground) so text/icons follow
+                // the light/dark theme instead of defaulting to black.
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background,
                 ) {
-                    GameScreen(
+                    androidx.compose.foundation.layout.Box(
+                        Modifier.windowInsetsPadding(WindowInsets.systemBars),
+                    ) {
+                        GameScreen(
                         ui = ui,
                         onSwipe = viewModel::onSwipe,
                         onNewGame = viewModel::requestNewGame,
@@ -57,7 +60,8 @@ class MainActivity : ComponentActivity() {
                         onContinue = viewModel::continueAfterWin,
                         onOpenSettings = { showSettings = true },
                         onOpenLeaderboard = { viewModel.showLeaderboards(this@MainActivity) },
-                    )
+                        )
+                    }
                 }
                 if (showSettings) {
                     SettingsBottomSheet(
@@ -66,19 +70,10 @@ class MainActivity : ComponentActivity() {
                         onFast = viewModel::setFast,
                         onVibration = viewModel::setVibration,
                         onSound = viewModel::setSound,
-                        onOrientation = viewModel::setOrientation,
                         onDismiss = { showSettings = false },
                     )
                 }
             }
-        }
-    }
-
-    private fun applyOrientation(mode: OrientationMode) {
-        requestedOrientation = when (mode) {
-            OrientationMode.PORTRAIT -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            OrientationMode.LANDSCAPE -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-            OrientationMode.AUTO -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
         }
     }
 

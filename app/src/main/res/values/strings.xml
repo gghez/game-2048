@@ -27,9 +27,6 @@
     <string name="vibration_desc">Une vibration à chaque déplacement.</string>
     <string name="sound_title">Activer le son</string>
     <string name="sound_desc">Un petit bruit à chaque déplacement.</string>
-    <string name="orientation_portrait">Portrait</string>
-    <string name="orientation_auto">Auto</string>
-    <string name="orientation_landscape">Landscape</string>
 
     <!-- Game state -->
     <string name="undo">Annuler</string>

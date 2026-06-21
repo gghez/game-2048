@@ -16,7 +16,6 @@ class SettingsRepository(private val context: Context) {
         val FAST = booleanPreferencesKey("fast_animations")
         val VIBRATION = booleanPreferencesKey("vibration")
         val SOUND = booleanPreferencesKey("sound")
-        val ORIENTATION = stringPreferencesKey("orientation")
     }
 
     val settings: Flow<GameSettings> = context.settingsDataStore.data.map { p ->
@@ -25,7 +24,6 @@ class SettingsRepository(private val context: Context) {
             fastAnimations = p[Keys.FAST] ?: false,
             vibration = p[Keys.VIBRATION] ?: false,
             sound = p[Keys.SOUND] ?: true,
-            orientation = p[Keys.ORIENTATION]?.let { runCatching { OrientationMode.valueOf(it) }.getOrNull() } ?: OrientationMode.PORTRAIT,
         )
     }
 
@@ -43,9 +41,5 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setSound(on: Boolean) {
         context.settingsDataStore.edit { it[Keys.SOUND] = on }
-    }
-
-    suspend fun setOrientation(mode: OrientationMode) {
-        context.settingsDataStore.edit { it[Keys.ORIENTATION] = mode.name }
     }
 }

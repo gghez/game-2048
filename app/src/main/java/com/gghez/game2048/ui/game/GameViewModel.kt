@@ -12,7 +12,6 @@ import com.gghez.game2048.data.leaderboard.LeaderboardRepository
 import com.gghez.game2048.data.score.SavedGame
 import com.gghez.game2048.data.score.ScoreRepository
 import com.gghez.game2048.data.settings.GameSettings
-import com.gghez.game2048.data.settings.OrientationMode
 import com.gghez.game2048.data.settings.SettingsRepository
 import com.gghez.game2048.data.settings.ThemeMode
 import com.gghez.game2048.feedback.GameFeedback
@@ -179,7 +178,6 @@ class GameViewModel(
     fun setFast(on: Boolean) = viewModelScope.launch { settingsRepo.setFastAnimations(on) }.let { }
     fun setVibration(on: Boolean) = viewModelScope.launch { settingsRepo.setVibration(on) }.let { }
     fun setSound(on: Boolean) = viewModelScope.launch { settingsRepo.setSound(on) }.let { }
-    fun setOrientation(m: OrientationMode) = viewModelScope.launch { settingsRepo.setOrientation(m) }.let { }
 
     fun showLeaderboards(activity: Activity) = leaderboard.showLeaderboards(activity)
 

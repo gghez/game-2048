@@ -17,9 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.ScreenRotation
-import androidx.compose.material.icons.filled.StayCurrentLandscape
-import androidx.compose.material.icons.filled.StayCurrentPortrait
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +36,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.gghez.game2048.R
 import com.gghez.game2048.data.settings.GameSettings
-import com.gghez.game2048.data.settings.OrientationMode
 import com.gghez.game2048.data.settings.ThemeMode
 
 /**
@@ -56,7 +52,6 @@ fun SettingsBottomSheet(
     onFast: (Boolean) -> Unit,
     onVibration: (Boolean) -> Unit,
     onSound: (Boolean) -> Unit,
-    onOrientation: (OrientationMode) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -90,26 +85,6 @@ fun SettingsBottomSheet(
             ToggleRow(stringResource(R.string.sound_title), stringResource(R.string.sound_desc), settings.sound, onSound)
             ToggleRow(stringResource(R.string.fast_anim_title), stringResource(R.string.fast_anim_desc), settings.fastAnimations, onFast)
             ToggleRow(stringResource(R.string.vibration_title), stringResource(R.string.vibration_desc), settings.vibration, onVibration)
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                SelectableChip(
-                    label = stringResource(R.string.orientation_portrait),
-                    icon = Icons.Default.StayCurrentPortrait,
-                    selected = settings.orientation == OrientationMode.PORTRAIT,
-                    modifier = Modifier.weight(1f),
-                ) { onOrientation(OrientationMode.PORTRAIT) }
-                SelectableChip(
-                    label = stringResource(R.string.orientation_auto),
-                    icon = Icons.Default.ScreenRotation,
-                    selected = settings.orientation == OrientationMode.AUTO,
-                    modifier = Modifier.weight(1f),
-                ) { onOrientation(OrientationMode.AUTO) }
-                SelectableChip(
-                    label = stringResource(R.string.orientation_landscape),
-                    icon = Icons.Default.StayCurrentLandscape,
-                    selected = settings.orientation == OrientationMode.LANDSCAPE,
-                    modifier = Modifier.weight(1f),
-                ) { onOrientation(OrientationMode.LANDSCAPE) }
-            }
         }
     }
 }

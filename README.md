@@ -11,8 +11,9 @@ A free, open-source **2048** game for Android.
 - Score and best score (persisted locally).
 - Move timer (`MM:SS`) and move counter.
 - Single-level **undo**.
-- Light / dark theme, faster-animations toggle, vibration toggle, and
-  orientation selector (Portrait / Auto / Landscape).
+- Sound (on by default) and vibration toggles, with a synthesized swipe/merge cue.
+- Light / dark theme and a faster-animations toggle.
+- Portrait orientation only.
 - "New game" confirmation dialog.
 - In-progress game is saved and resumed automatically.
 - Optional **Google Play Games** leaderboards (two boards: best score and best tile).

@@ -38,6 +38,10 @@ import com.gghez.game2048.ui.components.GameGrid
 import com.gghez.game2048.ui.components.NewGameDialog
 import com.gghez.game2048.ui.components.ScoreCard
 
+/**
+ * Portrait layout: header (title + actions), score row, the square board (sized to
+ * the available width), then the footer (timer, undo, move count).
+ */
 @Composable
 fun GameScreen(
     ui: GameUiState,
@@ -54,7 +58,6 @@ fun GameScreen(
     Column(
         Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
     ) {
         // Header
