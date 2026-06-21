@@ -81,13 +81,19 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        (application as Game2048App).container.leaderboard.attach(this)
+        vm?.resumeTimer()
+    }
+
     override fun onPause() {
         super.onPause()
         vm?.pauseTimer()
     }
 
-    override fun onResume() {
-        super.onResume()
-        vm?.resumeTimer()
+    override fun onDestroy() {
+        (application as Game2048App).container.leaderboard.attach(null)
+        super.onDestroy()
     }
 }

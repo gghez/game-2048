@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -15,6 +17,17 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Google Play Games ids are read from local.properties (never committed).
+        // When absent, the generated strings are empty and the app falls back to
+        // NoopLeaderboard, so it builds and runs without a Play Console account.
+        val localProps = Properties().apply {
+            val f = rootProject.file("local.properties")
+            if (f.exists()) f.inputStream().use { load(it) }
+        }
+        resValue("string", "game_services_project_id", localProps.getProperty("playGamesAppId", ""))
+        resValue("string", "leaderboard_speed", localProps.getProperty("leaderboardSpeed", ""))
+        resValue("string", "leaderboard_efficiency", localProps.getProperty("leaderboardEfficiency", ""))
     }
     buildTypes {
         release {
@@ -46,7 +59,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("com.google.android.gms:play-services-games-v2:20.1.2")
+    implementation("com.google.android.gms:play-services-games-v2:21.0.0")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test:2.0.21")
 }

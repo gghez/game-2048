@@ -7,6 +7,26 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Game2048">
+
+        <!--
+          Google Play Games (optional). The v2 SDK auto-initializes at launch and
+          REQUIRES a valid numeric APP_ID; an empty value crashes the app. To keep
+          the game runnable without a Play Console account, this meta-data is left
+          commented out by default (the app uses NoopLeaderboard).
+
+          To enable leaderboards:
+            1. Put your ids in local.properties:
+                 playGamesAppId=1234567890
+                 leaderboardSpeed=CgkI...speed
+                 leaderboardEfficiency=CgkI...efficiency
+            2. Uncomment the meta-data below.
+        -->
+        <!--
+        <meta-data
+            android:name="com.google.android.gms.games.APP_ID"
+            android:value="@string/game_services_project_id" />
+        -->
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
