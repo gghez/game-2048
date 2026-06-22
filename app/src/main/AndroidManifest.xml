@@ -12,16 +12,10 @@
 
         <!--
           Google Play Games (optional). The v2 SDK auto-initializes at launch and
-          REQUIRES a valid numeric APP_ID; an empty value crashes the app. To keep
-          the game runnable without a Play Console account, this meta-data is left
-          commented out by default (the app uses NoopLeaderboard).
-
-          To enable leaderboards:
-            1. Put your ids in local.properties:
-                 playGamesAppId=1234567890
-                 leaderboardSpeed=CgkI...speed
-                 leaderboardEfficiency=CgkI...efficiency
-            2. Uncomment the meta-data below.
+          REQUIRES a valid numeric APP_ID; an empty value crashes the app. So this
+          meta-data stays commented out by default and the app uses NoopLeaderboard,
+          which keeps it runnable without a Play Console account.
+          Enabling it is a deployment step — see the GitHub issue labelled "deployment".
         -->
         <!--
         <meta-data

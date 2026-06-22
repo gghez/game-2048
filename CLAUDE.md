@@ -45,7 +45,9 @@ purpose of this project and must be rejected.
 
 ## Where to look
 
-- Build, run, and Play Games setup: `README.md`.
+- Build & run: `README.md`.
 - Detailed architecture and design decisions: `docs/ARCHITECTURE.md`.
 - Module-specific stances: nested `CLAUDE.md` in `domain/`, `data/`, `ui/`.
 - Path-scoped rules Claude must follow: `.claude/rules/`.
+- Deployment & release steps (signing, Play Store, Play Games, privacy policy):
+  GitHub issues labelled `deployment` — intentionally not documented in-repo.

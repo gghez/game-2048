@@ -52,28 +52,13 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 The APK is written to `app/build/outputs/apk/debug/app-debug.apk`.
 
-## Google Play Games leaderboards (optional)
+## Deployment & release
 
-Leaderboards are **disabled by default** so the project builds and runs without a
-Google Play Console account (it falls back to a no-op leaderboard). To enable
-them:
-
-1. Create a game in the Google Play Console and create two leaderboards
-   ("Vitesse d'exécution" for best score, "Optimisation des déplacements" for
-   best tile).
-2. Add the ids to `local.properties` (never committed):
-
-   ```properties
-   playGamesAppId=1234567890
-   leaderboardSpeed=CgkI...speed
-   leaderboardEfficiency=CgkI...efficiency
-   ```
-
-3. Uncomment the `com.google.android.gms.games.APP_ID` meta-data block in
-   `app/src/main/AndroidManifest.xml`.
-
-> The Play Games v2 SDK auto-initializes at launch and requires a valid numeric
-> `APP_ID`; that is why the meta-data is commented out until you configure it.
+Leaderboards are disabled by default and the app builds and runs without a Google
+Play Console account (it falls back to a no-op leaderboard). Release and store
+deployment steps — release signing, Play Store publishing, Google Play Games
+setup, privacy policy, and store graphics — are tracked as
+[GitHub issues](https://github.com/gghez/game-2048/issues?q=is%3Aissue+label%3Adeployment).
 
 ## Project layout
 
