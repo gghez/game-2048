@@ -42,6 +42,9 @@ purpose of this project and must be rejected.
   (`res/values/strings.xml`), accents included.
 - No paid or tracking dependencies, ever.
 - Domain logic stays Android-free and unit-tested.
+- When you change anything deployment-related (signing, publishing, store assets,
+  hosting, cloud resources), update `docs/agent-references/deployment.md` in the
+  same change. Never commit secrets to it.
 
 ## Where to look
 
@@ -49,5 +52,5 @@ purpose of this project and must be rejected.
 - Detailed architecture and design decisions: `docs/ARCHITECTURE.md`.
 - Module-specific stances: nested `CLAUDE.md` in `domain/`, `data/`, `ui/`.
 - Path-scoped rules Claude must follow: `.claude/rules/`.
-- Deployment & release steps (signing, Play Store, Play Games, privacy policy):
-  GitHub issues labelled `deployment` — intentionally not documented in-repo.
+- Deployment state & how the app ships: `docs/agent-references/deployment.md`
+  (step-by-step CLI procedures stay in GitHub issues labelled `deployment`).

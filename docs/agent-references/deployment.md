@@ -1,0 +1,80 @@
+# Deployment reference — how 2exp11 ships to Google Play
+
+> Living record of the actual deployment setup. **Keep it current** whenever you
+> change anything deployment-related (see the maintenance rule in the root
+> `CLAUDE.md`). **Never put secrets here** — no keystore passwords, no service
+> account key contents, no absolute machine paths.
+>
+> Step-by-step CLI procedures live in the GitHub issues labelled `deployment`
+> (#1–#5). This file records what was actually done and what remains.
+
+## App identity
+
+- **Display name:** `2exp11` (reads as 2¹¹ = 2048). "2048" was already taken on the
+  Store; the rename avoids a trademark/duplicate rejection. Defined once in
+  `app_name` (`res/values/strings.xml`); the in-app header reads that resource.
+- **Technical package id** (`applicationId` / `namespace`): `com.gghez.game2048`.
+  Intentionally **unchanged** — it is invisible to users, already globally unique,
+  and immutable once published. Do not rename it.
+- Version: `versionCode` / `versionName` in `app/build.gradle.kts`.
+
+## Wired in the repo (done)
+
+- **Release signing** (issue #1): `signingConfigs.release` in `app/build.gradle.kts`,
+  credentials read from `local.properties` (`RELEASE_STORE_FILE`,
+  `RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`). When those
+  are absent the release build is simply unsigned, so CI/local builds still work.
+  `*.jks` is git-ignored.
+- **Gradle Play Publisher 3.11.0** (issue #2): plugin declared in root + app
+  `build.gradle.kts`; `play {}` block targets the `internal` track and defaults to
+  App Bundles. It reads `play-service-account.json` at the repo root (git-ignored).
+- **Launcher icon + store graphics** (issue #5): a `2¹¹` placeholder generated with
+  ImageMagick. Density buckets in `app/src/main/res/mipmap-*/` (`ic_launcher.png` +
+  `ic_launcher_round.png`); source art and store assets in `store-assets/`
+  (`icon-source.png`, `play-icon-512.png`, `play-feature-1024x500.png`). Manifest
+  references `@mipmap/ic_launcher` + `@mipmap/ic_launcher_round`. Replace with real
+  art when available.
+- **Privacy policy** (issue #4): `docs/privacy.md`, hosted on GitHub Pages.
+
+## Cloud / external resources (created)
+
+- **GitHub Pages:** enabled from `/docs` on `main`. Privacy policy is live at
+  <https://gghez.github.io/game-2048/privacy>.
+- **GCP project:** `<gcp-project>` — dedicated to Play publishing (kept
+  separate from other projects).
+- **Service account:** `<service-account-email>`.
+  Android Publisher API enabled on that project. Its JSON key was generated locally
+  and is git-ignored — it must never be committed.
+- **Google Play Console:** account created and active (owned by the project owner's
+  Google account).
+
+## Remaining manual / web steps
+
+These cannot be scripted from here (interactive secrets or web-only consoles):
+
+1. **Generate the upload keystore** (`keytool`) — pick passwords, store the `.jks`
+   outside the repo, add its path + passwords to `local.properties`. (Interactive,
+   handles secrets.)
+2. **Invite the service account** in Play Console → *Users & permissions*: add the
+   service-account email above and grant release permissions.
+3. **Create the app entry** in Play Console (name `2exp11`, default language
+   `fr-FR`, type Game, free).
+4. **Questionnaires:** content rating (IARC) and Data safety — declare *no data
+   collected, no tracking*.
+5. **Paste the privacy policy URL** into the store listing.
+6. **Screenshots:** capture from a device (`adb exec-out screencap -p > shot.png`).
+   No device was connected during setup, so none were generated.
+7. **Real icon (optional):** replace the placeholder with proper adaptive-icon art.
+8. **Leaderboards (optional, issue #3):** create the Play Games Services config and
+   two leaderboards on the web, put their ids + the numeric App ID in
+   `local.properties`, then uncomment the `games.APP_ID` meta-data in
+   `AndroidManifest.xml`. The app falls back to `NoopLeaderboard` until then.
+
+## Release commands (CLI, after the manual setup)
+
+```bash
+./gradlew bundleRelease            # build the signed AAB
+./gradlew bootstrapListing         # first time: pull listing metadata into app/src/main/play/
+./gradlew publishReleaseBundle     # upload the AAB to the internal track
+./gradlew promoteArtifact --from-track internal --promote-track production
+```
