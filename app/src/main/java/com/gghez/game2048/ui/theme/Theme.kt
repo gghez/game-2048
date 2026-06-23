@@ -8,20 +8,20 @@ import androidx.compose.ui.graphics.Color
 
 private val LightScheme = lightColorScheme(
     background = AppBackgroundLight,
-    surface = AppBackgroundLight,
-    onBackground = BrownText,
-    onSurface = BrownText,
+    surface = SurfaceLight,
+    onBackground = BodyTextLight,
+    onSurface = BodyTextLight,
     primary = Accent,
-    onPrimary = Color.White,
+    onPrimary = Base3,
 )
 
 private val DarkScheme = darkColorScheme(
     background = AppBackgroundDark,
-    surface = AppBackgroundDark,
-    onBackground = CreamText,
-    onSurface = CreamText,
+    surface = SurfaceDark,
+    onBackground = BodyTextDark,
+    onSurface = BodyTextDark,
     primary = Accent,
-    onPrimary = Color.White,
+    onPrimary = Base3,
 )
 
 @Composable
