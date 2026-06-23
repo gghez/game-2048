@@ -87,11 +87,19 @@ The whole automatable procedure is captured, credentials-free, in `scripts/`
 - `gen-upload-keystore.sh` — upload keystore + passwords → `.store-passwd` (`keytool`)
 - `gen-store-assets.sh` — launcher icon + store graphics (`ImageMagick`)
 - `enable-github-pages.sh` — host the privacy policy (`gh`)
-- `invite-publisher-sa.sh` — grant the SA Play Console access (Android Publisher API)
-- `release.sh [build|publish|promote]` — build/upload/promote (`gradlew`)
+- `grant-app-publisher-sa.sh` / `invite-publisher-sa.sh` — grant the SA per-app /
+  account-wide Play Console access (Android Publisher API)
+- `release.sh [build|listing|publish|promote]` — build / push store listing /
+  upload AAB / promote (`gradlew` + Gradle Play Publisher)
+- `set-data-safety.sh` — submit Data safety (API; payload format to confirm)
 
-Scripts read sensitive values (project id, SA email, developer id, keystore
-passwords) from `.store-passwd` (git-ignored) — never hard-coded.
+Store listing text + graphics are versioned under `app/src/main/play/`
+(`listings/fr-FR/…`); edit and push with `release.sh listing`. Scripts read
+sensitive values from `.store-passwd` (git-ignored) — never hard-coded.
+
+**Still web-only (no API):** content rating (IARC), Ads, App access, Target
+audience, app category — these App-content declarations must be filled in the
+Console.
 
 ## Release commands (CLI, after the manual setup)
 

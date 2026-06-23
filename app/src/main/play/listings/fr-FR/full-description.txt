@@ -1,0 +1,21 @@
+2exp11 est un jeu de puzzle de fusion de tuiles : faites glisser, combinez les nombres identiques et tentez d'atteindre la tuile 2¹¹ (2048).
+
+Des règles simples, une prise en main immédiate, et une difficulté qui monte à chaque fusion. Parfait pour une partie rapide comme pour de longues sessions de réflexion.
+
+UN VRAI CADEAU, POUR TOUJOURS
+• Aucune publicité
+• Aucun achat intégré
+• Aucun pistage, aucune collecte de données
+• Gratuit et open source (licence MIT)
+
+FONCTIONNALITÉS
+• Glissement fluide et animations soignées des tuiles
+• Score et meilleur score conservés sur l'appareil
+• Bouton « Annuler » pour revenir sur le dernier coup
+• Thème clair ou sombre, au choix
+• Vibrations et son optionnels à chaque déplacement
+• Classements Google Play optionnels (jamais obligatoires)
+
+2exp11 ne collecte aucune donnée personnelle et ne transmet rien à des tiers. Tout reste sur votre appareil.
+
+Bon jeu !

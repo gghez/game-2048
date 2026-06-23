@@ -15,22 +15,36 @@ Run from the repo root. Order for a fresh setup:
 | 4 | `enable-github-pages.sh` | Host `docs/privacy.md` on GitHub Pages (`gh`) | no |
 | 5a | `grant-app-publisher-sa.sh` | **Preferred:** grant the SA access to ONE app only (least privilege). Requires the app to exist in the Console | needs an owner token (see below) |
 | 5b | `invite-publisher-sa.sh` | Grant the SA **account-wide** publishing access (all apps). Use only if per-app is impractical | needs an owner token (see below) |
-| 6 | `release.sh [build\|publish\|promote]` | Build signed AAB / upload / promote (`gradlew`) | no |
+| 6 | `release.sh [build\|listing\|publish\|promote]` | Build signed AAB / push store listing / upload / promote (`gradlew`) | no |
+| 7 | `set-data-safety.sh [payload]` | Submit the Data safety declaration (API). Payload format unverified — see script header | no |
 
 > Prefer **5a** (per-app). Account-level permissions from **5b** apply to *every*
 > app on the developer account.
 
-## Irreducibly manual (web console, not scriptable)
+## Store listing (versioned, automatable)
+
+Listing text and graphics live under `app/src/main/play/` (Gradle Play Publisher
+"fastlane" layout): `listings/fr-FR/{title,short-description,full-description}.txt`
+and `listings/fr-FR/graphics/{icon,feature-graphic,phone-screenshots}/`. Edit those
+files, then `scripts/release.sh listing` pushes them to the Store. **Add phone
+screenshots** (≥2) under `graphics/phone-screenshots/` before submission — none were
+captured during setup (no device).
+
+## Irreducibly manual (web console — no API)
 
 - Create the Play Console account and the app entry (`2exp11`, fr-FR, Game, free).
-- Content rating (IARC) and Data safety questionnaires (declare no data, no tracking).
-- Paste the privacy-policy URL into the listing; upload screenshots.
+- **Content rating (IARC)**, **Ads**, **App access**, **Target audience** — App
+  content declarations with no public API.
 
-## The owner token for step 5
+(Data safety *does* have an API — see `set-data-safety.sh`, payload format to confirm.)
+
+## The owner token (steps 5, and 7 if the SA lacks app-content rights)
 
 Play Console permissions are not GCP IAM, so `gcloud` cannot set them and the
 service account cannot grant itself its first access. Step 5 must be authenticated
-as a Play Console **owner/admin** with the `androidpublisher` scope. gcloud's
+as a Play Console **owner/admin** with the `androidpublisher` scope. (Steps 3/4 are
+local; `release.sh` uses the SA key. `set-data-safety.sh` may also need the owner
+token if the SA isn't granted app-content management.) gcloud's
 built-in OAuth client does not whitelist that scope for `print-access-token`, and
 only `application-default login` accepts `--scopes`, so re-login the ADC once with
 the scope included:
