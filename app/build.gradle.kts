@@ -4,6 +4,14 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("com.github.triplet.play")
+}
+
+// Local, never-committed config: signing credentials and optional Play Games ids.
+// When absent (e.g. CI without secrets), signing/leaderboards degrade gracefully.
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
 }
 
 android {
@@ -21,16 +29,25 @@ android {
         // Google Play Games ids are read from local.properties (never committed).
         // When absent, the generated strings are empty and the app falls back to
         // NoopLeaderboard, so it builds and runs without a Play Console account.
-        val localProps = Properties().apply {
-            val f = rootProject.file("local.properties")
-            if (f.exists()) f.inputStream().use { load(it) }
-        }
         resValue("string", "game_services_project_id", localProps.getProperty("playGamesAppId", ""))
         resValue("string", "leaderboard_speed", localProps.getProperty("leaderboardSpeed", ""))
         resValue("string", "leaderboard_efficiency", localProps.getProperty("leaderboardEfficiency", ""))
     }
+    signingConfigs {
+        // Release signing is configured only when local.properties provides the
+        // upload keystore. Otherwise the "release" config is absent and a release
+        // build stays unsigned (fine for local checks / CI without secrets).
+        val ksPath = localProps.getProperty("RELEASE_STORE_FILE")
+        if (ksPath != null) create("release") {
+            storeFile = file(ksPath)
+            storePassword = localProps.getProperty("RELEASE_STORE_PASSWORD")
+            keyAlias = localProps.getProperty("RELEASE_KEY_ALIAS")
+            keyPassword = localProps.getProperty("RELEASE_KEY_PASSWORD")
+        }
+    }
     buildTypes {
         release {
+            signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -62,4 +79,13 @@ dependencies {
     implementation("com.google.android.gms:play-services-games-v2:21.0.0")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test:2.0.21")
+}
+
+// Gradle Play Publisher: CLI-driven uploads to Google Play.
+// The service-account JSON is git-ignored; when it is missing the plugin tasks
+// simply fail at call time, so normal builds are unaffected.
+play {
+    serviceAccountCredentials.set(rootProject.file("play-service-account.json"))
+    defaultToAppBundles.set(true)
+    track.set("internal")
 }

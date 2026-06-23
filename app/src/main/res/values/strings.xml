@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">2048</string>
+    <string name="app_name">2exp11</string>
 
     <!-- Score row -->
     <string name="score">SCORE</string>

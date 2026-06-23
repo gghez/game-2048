@@ -1,13 +1,14 @@
-# 2048
+# 2exp11
 
-A free, open-source **2048** game for Android.
+A free, open-source **2exp11** game for Android — the classic "combine tiles up to
+2¹¹" sliding-tile puzzle.
 
 > **No ads. No in-app purchases. No tracking. No hidden economic model. Forever.**
 > This game is a gift. See [CLAUDE.md](CLAUDE.md) for the full, non-negotiable vision.
 
 ## Features
 
-- Classic 4×4 2048 gameplay with smooth tile animations.
+- Classic 4×4 sliding-tile gameplay (merge up to 2¹¹) with smooth tile animations.
 - Score and best score (persisted locally).
 - Move timer (`MM:SS`) and move counter.
 - Single-level **undo**.
