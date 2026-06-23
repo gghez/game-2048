@@ -101,7 +101,15 @@ sensitive values from `.store-passwd` (git-ignored) — never hard-coded.
 audience, app category — these App-content declarations must be filled in the
 Console.
 
-## Release commands (CLI, after the manual setup)
+## First publication must be manual (API limitation)
+
+Google **blocks the Publisher API from committing edits until the app's first
+release has been published via the Console** (a `release.sh listing`/`publish`
+attempt on a never-published app fails with `403 PERMISSION_DENIED` at the commit
+step, even with a correctly-permissioned SA). So for **v1**, fill the store listing
+and upload the first AAB **by hand** in the Console. The CLI below works for **v2+**.
+
+## Release commands (CLI, for updates after the first manual publication)
 
 ```bash
 scripts/release.sh build      # build the signed AAB

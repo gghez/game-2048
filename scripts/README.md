@@ -5,6 +5,12 @@ Sensitive values (GCP project id, service-account email, Play developer id,
 keystore passwords) are **never** hard-coded here — scripts read them from
 `.store-passwd` at the repo root (git-ignored) or from the environment.
 
+> **First publication is manual.** Google blocks the Publisher API from committing
+> edits until the app's first release is published via the Console (otherwise
+> `403 PERMISSION_DENIED` at commit). `release.sh listing`/`publish`/`promote` and
+> `set-data-safety.sh` only work **after** that first manual publication. For v1,
+> fill the listing and upload the first AAB by hand.
+
 Run from the repo root. Order for a fresh setup:
 
 | # | Script | What it does | Manual? |
