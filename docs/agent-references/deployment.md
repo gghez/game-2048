@@ -16,7 +16,9 @@
 - **Technical package id** (`applicationId` / `namespace`): `com.gghez.game2048`.
   Intentionally **unchanged** — it is invisible to users, already globally unique,
   and immutable once published. Do not rename it.
-- Version: `versionCode` / `versionName` in `app/build.gradle.kts`.
+- Version: `versionCode` / `versionName` in `app/build.gradle.kts`. On CI they are
+  derived from the pushed git tag (`vX.Y.Z` → name `X.Y.Z`, code `X*10000+Y*100+Z`)
+  via the `VERSION_NAME` / `VERSION_CODE` env vars; local builds fall back to `1`/`1.0`.
 
 ## Wired in the repo (done)
 
@@ -73,10 +75,28 @@ These cannot be scripted from here (interactive secrets or web-only consoles):
 4. **Screenshots:** capture from a device (`adb exec-out screencap -p > shot.png`).
    No device was connected during setup, so none were generated.
 5. **Real icon (optional):** replace the placeholder with proper adaptive-icon art.
-6. **Leaderboards (optional, issue #3):** create the Play Games Services config and
-   two leaderboards on the web, put their ids + the numeric App ID in
-   `local.properties`, then uncomment the `games.APP_ID` meta-data in
-   `AndroidManifest.xml`. The app falls back to `NoopLeaderboard` until then.
+6. **Leaderboards (issue #3) — boards created, OAuth/publish remain.** The app
+   submits to **three** boards (`LeaderboardKind`): `SPEED` = best score,
+   `EFFICIENCY` = best tile, `TIME_TO_2048` = fastest time to reach 2048 (submitted
+   in **milliseconds** at the first win; **Time** score type, smaller-is-better; the
+   other two are NUMERIC, larger-is-better). The three boards were **created via the
+   Games Configuration API** (`gamesconfiguration.googleapis.com`, enabled on the
+   publishing project; `leaderboardConfigurations.insert` with an owner ADC token +
+   `x-goog-user-project`). The numeric App ID and the three leaderboard ids are
+   recorded in `.store-passwd` (git-ignored) and set as GitHub Actions secrets
+   (`PLAY_GAMES_APP_ID`, `LEADERBOARD_SPEED/_EFFICIENCY/_TIME`); locally they live in
+   `local.properties` (`playGamesAppId`, `leaderboardSpeed`, `leaderboardEfficiency`,
+   `leaderboardTime`) → injected as string resources. The `games.APP_ID` manifest
+   meta-data stays commented in the repo (empty id crashes the app); CI uncomments it
+   automatically, and `LeaderboardProvider` only uses the real impl when **all four**
+   ids are set — otherwise `NoopLeaderboard`, so the app always builds/runs without them.
+
+   **Still web-only for sign-in to work at runtime** (no public API for OAuth Android
+   clients): in Play Console → Play Games Services → Setup and management →
+   Configuration: (a) configure the **OAuth consent screen** (GCP), (b) **Create
+   credentials** → Android, bound to the package + the **Play App-signing SHA-1**
+   (Test and release → App integrity), and (c) **Review and publish** the Games
+   Services project. Draft boards are already visible to the project's testers.
 
 ## Reproducible scripts
 
@@ -136,3 +156,32 @@ scripts/release.sh build         # build the signed AAB
 scripts/publish-internal.sh      # upload AAB + release on the internal track (API)
 TRACK=production scripts/publish-internal.sh   # once the app has been published once
 ```
+
+## Continuous deployment — tag → internal track
+
+`.github/workflows/release.yml` runs on a pushed semver tag (`vX.Y.Z`): it derives
+the version from the tag, restores the upload keystore, writes `local.properties`
+(signing + leaderboard ids), enables the Play Games meta-data, builds a signed AAB,
+mints a service-account access token (`google-github-actions/auth`, `androidpublisher`
+scope) and reuses `scripts/publish-internal.sh` to release on the **internal** track.
+First production publish stays manual; promote internal → production in the Console.
+
+```bash
+git tag v1.1.0 && git push origin v1.1.0   # triggers the release workflow
+```
+
+**Required GitHub repo secrets** (Settings → Secrets and variables → Actions):
+
+| Secret | Value |
+|--------|-------|
+| `UPLOAD_KEYSTORE_BASE64` | `base64 -w0 <upload.jks>` |
+| `RELEASE_STORE_PASSWORD` / `RELEASE_KEY_ALIAS` / `RELEASE_KEY_PASSWORD` | from `.store-passwd` |
+| `PLAY_SERVICE_ACCOUNT_JSON` | full contents of the publisher SA key JSON |
+| `PLAY_GAMES_APP_ID` | numeric Play Games App ID |
+| `LEADERBOARD_SPEED` / `LEADERBOARD_EFFICIENCY` / `LEADERBOARD_TIME` | the three board ids |
+
+The SA was verified able to open/abort Publisher API edits (per-app grant). The
+`:commit` on the internal track is exercised for the first time by the first tag run —
+if it returns `403`, grant the SA the app-level "release to testing tracks" permission
+(`scripts/grant-app-publisher-sa.sh`). The earlier `403` was on the store-listing
+review commit, a different operation.

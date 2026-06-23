@@ -13,8 +13,11 @@ object LeaderboardProvider {
         val appId = context.getString(R.string.game_services_project_id)
         val speed = context.getString(R.string.leaderboard_speed)
         val efficiency = context.getString(R.string.leaderboard_efficiency)
-        return if (appId.isNotEmpty() && speed.isNotEmpty() && efficiency.isNotEmpty()) {
-            PlayGamesLeaderboard(speed, efficiency)
+        val time = context.getString(R.string.leaderboard_time)
+        val configured = appId.isNotEmpty() && speed.isNotEmpty() &&
+            efficiency.isNotEmpty() && time.isNotEmpty()
+        return if (configured) {
+            PlayGamesLeaderboard(speed, efficiency, time)
         } else {
             NoopLeaderboard()
         }

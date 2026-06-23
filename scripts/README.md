@@ -31,9 +31,26 @@ Run from the repo root. Order for a fresh setup:
 | 7a | `publish-internal.sh` | **Works:** upload AAB + release on a testing track (default internal) via API, owner token | needs owner token |
 | 7b | `release.sh [build\|listing\|publish\|promote]` | Build signed AAB; `listing`/`publish` use GPP and currently fail (see gotcha) — prefer `upload-listing.sh` / `publish-internal.sh` | no |
 | 8 | `set-data-safety.sh <csv>` | Submit Data safety via API. Body is the Console questionnaire CSV (export template first) | needs owner token |
+| 9 | `create-leaderboards.sh` | Create the 3 leaderboards via the Games Configuration API (idempotent) | needs owner ADC |
+| 10 | `set-github-secrets.sh` | Push all 9 GitHub Actions secrets for the release workflow (`gh`) | no |
 
 > Prefer **5a** (per-app). Account-level permissions from **5b** apply to *every*
 > app on the developer account.
+
+## Leaderboards & CI (Play Games Services + tag → Play)
+
+- `create-leaderboards.sh` creates the three boards (best score, best tile, time-to-2048)
+  through `gamesconfiguration.googleapis.com`. The API needs an **owner** on the games
+  project (the publisher SA has no Games Services access), so authenticate ADC first
+  (`gcloud auth application-default login`); the call also needs `GCP_PROJECT` as the
+  quota project. The board ids it prints go in `.store-passwd` (git-ignored).
+- `set-github-secrets.sh` pushes the 9 secrets the release workflow needs
+  (`UPLOAD_KEYSTORE_BASE64`, `RELEASE_STORE_PASSWORD`/`_KEY_ALIAS`/`_KEY_PASSWORD`,
+  `PLAY_SERVICE_ACCOUNT_JSON`, `PLAY_GAMES_APP_ID`, `LEADERBOARD_SPEED`/`_EFFICIENCY`/`_TIME`),
+  reading values from `.store-passwd` + the keystore + `play-service-account.json`.
+  Never prints a value.
+- Pushing a `vX.Y.Z` tag then runs `.github/workflows/release.yml` → signed AAB →
+  internal track (see `docs/agent-references/deployment.md`).
 
 ## Store listing (versioned, automatable)
 
@@ -49,6 +66,13 @@ captured during setup (no device).
 - Create the Play Console account and the app entry (`2exp11`, fr-FR, Game, free).
 - **Content rating (IARC)**, **Ads**, **App access**, **Target audience** — App
   content declarations with no public API.
+- **Play Games Services sign-in setup** (leaderboard *creation* is scripted; the rest
+  is not): the **OAuth consent screen**, the **Android credential** bound to the
+  package + signing SHA-1, and **publishing the Games Services project**. There is no
+  usable API — the IAP OAuth Admin API is deprecated (shut down 2026-03-19) and never
+  worked for personal Google accounts. Consent-screen scopes: `games`, `games_lite`,
+  `drive.appdata`. Use the **Play App-signing SHA-1** (Test and release → App integrity)
+  for the credential, since Play re-signs installed builds.
 
 (Data safety *does* have an API — see `set-data-safety.sh`, payload format to confirm.)
 

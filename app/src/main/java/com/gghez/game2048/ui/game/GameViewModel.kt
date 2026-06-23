@@ -189,6 +189,12 @@ class GameViewModel(
     private suspend fun submitScores(s: GameState) {
         leaderboard.submit(LeaderboardKind.SPEED, s.score.toLong())
         leaderboard.submit(LeaderboardKind.EFFICIENCY, (s.board.values().maxOrNull() ?: 0).toLong())
+        // WON fires once, the move that first creates the 2048 tile (before any
+        // "keep playing"). The elapsed time at that instant is the time-to-2048;
+        // the Play board keeps the smallest, so a later state never overrides it.
+        if (s.status == GameStatus.WON) {
+            leaderboard.submit(LeaderboardKind.TIME_TO_2048, _ui.value.elapsedSeconds * 1000L)
+        }
     }
 
     private fun persist() {

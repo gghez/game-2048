@@ -17,12 +17,14 @@ import kotlin.coroutines.resume
 class PlayGamesLeaderboard(
     private val speedId: String,
     private val efficiencyId: String,
+    private val timeId: String,
 ) : LeaderboardRepository {
 
     private var activityRef: WeakReference<Activity> = WeakReference(null)
     private val activity: Activity? get() = activityRef.get()
 
-    override val isAvailable: Boolean = speedId.isNotEmpty() && efficiencyId.isNotEmpty()
+    override val isAvailable: Boolean =
+        speedId.isNotEmpty() && efficiencyId.isNotEmpty() && timeId.isNotEmpty()
 
     override fun attach(activity: Activity?) {
         activityRef = WeakReference(activity)
@@ -48,6 +50,7 @@ class PlayGamesLeaderboard(
         val id = when (kind) {
             LeaderboardKind.SPEED -> speedId
             LeaderboardKind.EFFICIENCY -> efficiencyId
+            LeaderboardKind.TIME_TO_2048 -> timeId
         }
         runCatching { PlayGames.getLeaderboardsClient(act).submitScore(id, value) }
     }

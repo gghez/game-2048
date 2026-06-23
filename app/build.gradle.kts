@@ -22,8 +22,10 @@ android {
         applicationId = "com.gghez.game2048"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        // Tag-driven on CI: the release workflow exports VERSION_CODE / VERSION_NAME
+        // from the pushed git tag (vX.Y.Z). Local builds fall back to 1 / "1.0".
+        versionCode = (System.getenv("VERSION_CODE") ?: "1").toInt()
+        versionName = System.getenv("VERSION_NAME") ?: "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Google Play Games ids are read from local.properties (never committed).
@@ -32,6 +34,7 @@ android {
         resValue("string", "game_services_project_id", localProps.getProperty("playGamesAppId", ""))
         resValue("string", "leaderboard_speed", localProps.getProperty("leaderboardSpeed", ""))
         resValue("string", "leaderboard_efficiency", localProps.getProperty("leaderboardEfficiency", ""))
+        resValue("string", "leaderboard_time", localProps.getProperty("leaderboardTime", ""))
     }
     signingConfigs {
         // Release signing is configured only when local.properties provides the
