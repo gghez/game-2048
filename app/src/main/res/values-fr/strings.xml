@@ -38,4 +38,16 @@
     <!-- Language selector -->
     <string name="language_title">Langue</string>
     <string name="language_system">Système par défaut</string>
+
+    <!-- Gameplay tips (rotating carousel) -->
+    <string name="cd_tip">Astuce</string>
+    <string-array name="game_tips">
+        <item>Gardez votre plus grosse tuile dans un coin.</item>
+        <item>Rangez vos tuiles en ordre décroissant le long d\'un bord.</item>
+        <item>Choisissez une direction principale et évitez celle qui casse votre coin.</item>
+        <item>Anticipez deux ou trois coups à l\'avance.</item>
+        <item>Fusionnez les petites tuiles tôt pour libérer de l\'espace.</item>
+        <item>Ne glissez pas au hasard : gardez une ligne bien ordonnée.</item>
+        <item>Une grille pleine n\'est pas perdue : cherchez les fusions possibles.</item>
+    </string-array>
 </resources>

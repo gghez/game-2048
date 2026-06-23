@@ -32,4 +32,16 @@
     <!-- Language selector -->
     <string name="language_title">Sprache</string>
     <string name="language_system">Systemstandard</string>
+
+    <!-- Gameplay tips (rotating carousel) -->
+    <string name="cd_tip">Tipp</string>
+    <string-array name="game_tips">
+        <item>Behalte deine größte Kachel in einer Ecke.</item>
+        <item>Ordne deine Kacheln entlang einer Kante absteigend an.</item>
+        <item>Wähle eine Hauptrichtung und vermeide die, die deine Ecke zerstört.</item>
+        <item>Denke zwei oder drei Züge voraus.</item>
+        <item>Führe kleine Kacheln früh zusammen, um Platz zu schaffen.</item>
+        <item>Wische nicht zufällig: Halte eine Reihe gut geordnet.</item>
+        <item>Ein volles Feld ist nicht verloren: Suche nach möglichen Verschmelzungen.</item>
+    </string-array>
 </resources>

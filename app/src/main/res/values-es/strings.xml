@@ -38,4 +38,16 @@
     <!-- Language selector -->
     <string name="language_title">Idioma</string>
     <string name="language_system">Predeterminado del sistema</string>
+
+    <!-- Gameplay tips (rotating carousel) -->
+    <string name="cd_tip">Consejo</string>
+    <string-array name="game_tips">
+        <item>Mantén tu ficha más grande en una esquina.</item>
+        <item>Ordena tus fichas de mayor a menor a lo largo de un borde.</item>
+        <item>Elige una dirección principal y evita la que rompe tu esquina.</item>
+        <item>Piensa con dos o tres movimientos de antelación.</item>
+        <item>Combina las fichas pequeñas pronto para liberar espacio.</item>
+        <item>No deslices al azar: mantén una fila bien ordenada.</item>
+        <item>Un tablero lleno no está perdido: busca las combinaciones posibles.</item>
+    </string-array>
 </resources>
