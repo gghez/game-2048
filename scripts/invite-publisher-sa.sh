@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Grant the publishing service account access to the Play Console developer account
+# via the Android Publisher API (Users.create), with the minimal publishing
+# permissions. Re-runnable. No secrets in this file.
+#
+# WHY THIS NEEDS A SPECIAL TOKEN
+# Play Console permissions are NOT GCP IAM — `gcloud` cannot set them, and the
+# service account cannot grant itself its own first access (chicken-and-egg). The
+# call must be authenticated as a Play Console *owner/admin* (a human Google
+# account) with the scope https://www.googleapis.com/auth/androidpublisher.
+# gcloud's built-in OAuth client does not whitelist that scope for
+# `print-access-token --scopes`, so obtain a token via an interactive re-login
+# that includes the scope, e.g.:
+#   gcloud auth login \
+#     --scopes=https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/androidpublisher
+# After that, `gcloud auth print-access-token` yields an androidpublisher token.
+#
+# Sensitive values are read from .store-passwd (git-ignored) or the environment:
+#   DEVELOPER_ID           - Play Console developer id (the number in the console
+#                            URL .../developers/<DEVELOPER_ID>/...)
+#   SERVICE_ACCOUNT_EMAIL  - the play-publisher service account email
+#   GCP_PROJECT            - project where Android Publisher API is enabled (quota)
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+[ -f "$ROOT/.store-passwd" ] && source "$ROOT/.store-passwd"
+: "${DEVELOPER_ID:?set DEVELOPER_ID (number in the Play Console URL)}"
+: "${SERVICE_ACCOUNT_EMAIL:?set SERVICE_ACCOUNT_EMAIL}"
+
+TOKEN="${ACCESS_TOKEN:-$(gcloud auth print-access-token)}"
+
+# Account-level publishing permissions (least privilege for CI publishing):
+#   CAN_SEE_ALL_APPS                 - see the app(s)
+#   CAN_MANAGE_PUBLIC_APKS_GLOBAL    - release to production / Play App Signing
+#   CAN_MANAGE_TRACK_APKS_GLOBAL     - manage testing tracks (internal track)
+#   CAN_MANAGE_PUBLIC_LISTING_GLOBAL - manage store presence (listing metadata)
+read -r -d '' BODY <<JSON || true
+{
+  "email": "${SERVICE_ACCOUNT_EMAIL}",
+  "developerAccountPermissions": [
+    "CAN_SEE_ALL_APPS",
+    "CAN_MANAGE_PUBLIC_APKS_GLOBAL",
+    "CAN_MANAGE_TRACK_APKS_GLOBAL",
+    "CAN_MANAGE_PUBLIC_LISTING_GLOBAL"
+  ]
+}
+JSON
+
+echo "Granting $SERVICE_ACCOUNT_EMAIL access to developer $DEVELOPER_ID ..."
+curl -fsS -X POST \
+  "https://androidpublisher.googleapis.com/androidpublisher/v3/developers/${DEVELOPER_ID}/users" \
+  -H "Authorization: Bearer ${TOKEN}" \
+  -H "Content-Type: application/json" \
+  ${GCP_PROJECT:+-H "x-goog-user-project: ${GCP_PROJECT}"} \
+  -d "${BODY}"
+echo
+echo "Done. The service account can now publish via Gradle Play Publisher."

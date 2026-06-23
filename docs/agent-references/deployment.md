@@ -62,8 +62,13 @@ These cannot be scripted from here (interactive secrets or web-only consoles):
 1. **Back up the upload keystore** — the `.jks` and `.store-passwd` exist locally
    only. Copy them to a safe place; losing the upload key means requesting a reset
    from Google (possible thanks to Play App Signing).
-2. **Invite the service account** in Play Console → *Users & permissions*: add the
-   service-account email (recorded in `.store-passwd`) and grant release permissions.
+2. **Grant the service account Play Console access.** Scriptable via the Android
+   Publisher API — `scripts/invite-publisher-sa.sh` — but it needs an *owner* token
+   with the `androidpublisher` scope (Play Console permissions are not GCP IAM, and
+   the SA cannot grant itself its first access). gcloud's built-in OAuth client does
+   not whitelist that scope, so re-login once with it (see `scripts/README.md`).
+   Alternatively, do it in the web UI (*Users & permissions* → invite the SA email
+   from `.store-passwd`, grant Releases + Store presence).
 3. **Create the app entry** in Play Console (name `2exp11`, default language
    `fr-FR`, type Game, free).
 4. **Questionnaires:** content rating (IARC) and Data safety — declare *no data
@@ -77,11 +82,26 @@ These cannot be scripted from here (interactive secrets or web-only consoles):
    `local.properties`, then uncomment the `games.APP_ID` meta-data in
    `AndroidManifest.xml`. The app falls back to `NoopLeaderboard` until then.
 
+## Reproducible scripts
+
+The whole automatable procedure is captured, credentials-free, in `scripts/`
+(see `scripts/README.md` for the ordered table and prerequisites):
+
+- `create-publisher-sa.sh` — GCP project + service account + key + API (`gcloud`)
+- `gen-upload-keystore.sh` — upload keystore + passwords → `.store-passwd` (`keytool`)
+- `gen-store-assets.sh` — launcher icon + store graphics (`ImageMagick`)
+- `enable-github-pages.sh` — host the privacy policy (`gh`)
+- `invite-publisher-sa.sh` — grant the SA Play Console access (Android Publisher API)
+- `release.sh [build|publish|promote]` — build/upload/promote (`gradlew`)
+
+Scripts read sensitive values (project id, SA email, developer id, keystore
+passwords) from `.store-passwd` (git-ignored) — never hard-coded.
+
 ## Release commands (CLI, after the manual setup)
 
 ```bash
-./gradlew bundleRelease            # build the signed AAB
-./gradlew bootstrapListing         # first time: pull listing metadata into app/src/main/play/
-./gradlew publishReleaseBundle     # upload the AAB to the internal track
-./gradlew promoteArtifact --from-track internal --promote-track production
+scripts/release.sh build      # build the signed AAB
+./gradlew bootstrapListing    # first time: pull listing metadata into app/src/main/play/
+scripts/release.sh publish    # build + upload the AAB to the internal track
+scripts/release.sh promote    # promote internal -> production (no rebuild)
 ```
