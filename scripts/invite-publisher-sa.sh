@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# Grant the publishing service account access to the Play Console developer account
-# via the Android Publisher API (Users.create), with the minimal publishing
-# permissions. Re-runnable. No secrets in this file.
+# Grant the publishing service account ACCOUNT-WIDE publishing permissions on the
+# Play Console developer account via the Android Publisher API (Users.create).
+# Re-runnable. No secrets in this file.
+#
+# WARNING: account-level (*_GLOBAL) permissions apply to EVERY app on the developer
+# account, not just one. For least privilege, prefer grant-app-publisher-sa.sh
+# (per-app access) once the target app exists in the Console.
 #
 # WHY THIS NEEDS A SPECIAL TOKEN
 # Play Console permissions are NOT GCP IAM — `gcloud` cannot set them, and the

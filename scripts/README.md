@@ -13,8 +13,12 @@ Run from the repo root. Order for a fresh setup:
 | 2 | `gen-upload-keystore.sh` | Generate upload keystore + random passwords → `.store-passwd` + `local.properties` (`keytool`) | no |
 | 3 | `gen-store-assets.sh` | Launcher icon (all mipmap buckets) + store graphics (`ImageMagick`) | no |
 | 4 | `enable-github-pages.sh` | Host `docs/privacy.md` on GitHub Pages (`gh`) | no |
-| 5 | `invite-publisher-sa.sh` | Grant the SA Play Console access via Android Publisher API | needs an owner token (see below) |
+| 5a | `grant-app-publisher-sa.sh` | **Preferred:** grant the SA access to ONE app only (least privilege). Requires the app to exist in the Console | needs an owner token (see below) |
+| 5b | `invite-publisher-sa.sh` | Grant the SA **account-wide** publishing access (all apps). Use only if per-app is impractical | needs an owner token (see below) |
 | 6 | `release.sh [build\|publish\|promote]` | Build signed AAB / upload / promote (`gradlew`) | no |
+
+> Prefer **5a** (per-app). Account-level permissions from **5b** apply to *every*
+> app on the developer account.
 
 ## Irreducibly manual (web console, not scriptable)
 
