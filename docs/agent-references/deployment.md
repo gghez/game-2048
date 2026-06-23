@@ -183,8 +183,11 @@ git tag v1.1.0 && git push origin v1.1.0   # triggers the release workflow
 | `PLAY_GAMES_APP_ID` | numeric Play Games App ID |
 | `LEADERBOARD_SPEED` / `LEADERBOARD_EFFICIENCY` / `LEADERBOARD_TIME` | the three board ids |
 
-The SA was verified able to open/abort Publisher API edits (per-app grant). The
-`:commit` on the internal track is exercised for the first time by the first tag run —
-if it returns `403`, grant the SA the app-level "release to testing tracks" permission
-(`scripts/grant-app-publisher-sa.sh`). The earlier `403` was on the store-listing
-review commit, a different operation.
+**Verified end-to-end:** tag `v1.1.0` built and released versionCode 10100 on the
+internal track through the workflow (`committed edit …` succeeded). The SA's `:commit`
+works with the per-app grant + a **gcloud-minted** `androidpublisher` token; the
+earlier `403` was the store-listing review commit, a different operation. Token note:
+`google-github-actions/auth`'s `access_token` format routes through the IAM Credentials
+API and needs the SA to impersonate itself (`iam.serviceAccounts.getAccessToken`) —
+which fails — so the workflow mints the token straight from the SA key with
+`gcloud auth activate-service-account` + `print-access-token --scopes=…` instead.
