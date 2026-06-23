@@ -1,0 +1,17 @@
+# Local-only files copied into Claude Code worktrees.
+# Uses .gitignore syntax. Only files that are BOTH listed here AND gitignored
+# are copied; git-tracked files are never duplicated.
+# Docs: https://code.claude.com/docs/en/worktrees ("Copy gitignored files into worktrees")
+#
+# Without this, a fresh worktree has no SDK path or signing/publish config and
+# cannot build the app. The upload keystore itself lives outside the repo
+# (~/keystores/, see local.properties RELEASE_STORE_FILE) and cannot be copied here.
+
+# Android SDK path + release signing creds + Play Games IDs — required to build.
+local.properties
+
+# Upload keystore passwords & Play publishing identifiers (release/publish only).
+.store-passwd
+
+# Google Play service-account key used by the publish scripts (publish only).
+play-service-account.json
