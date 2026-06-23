@@ -5,6 +5,11 @@ Sensitive values (GCP project id, service-account email, Play developer id,
 keystore passwords) are **never** hard-coded here — scripts read them from
 `.store-passwd` at the repo root (git-ignored) or from the environment.
 
+**Reusable for another Android game:** these scripts are parameterised (package
+name, project, paths via env/`.store-passwd`), so they port to a new app by changing
+those values. The gotchas below (owner token, `changesNotSentForReview`, draft-app
+production rule, KVM access for the emulator) are the time-savers — read them first.
+
 > **Committing edits:** use an **owner** `androidpublisher` token (the SA's `:commit`
 > returns 403) and **do not** set `changesNotSentForReview` (this app auto-sends for
 > review; the param returns 400). `upload-listing.sh` does this correctly. Gradle
@@ -23,8 +28,9 @@ Run from the repo root. Order for a fresh setup:
 | 5b | `invite-publisher-sa.sh` | Grant the SA **account-wide** publishing access (all apps). Use only if per-app is impractical | needs an owner token (see below) |
 | 6a | `gen-screenshots.sh` | Capture phone screenshots on a headless emulator (`adb`) | no |
 | 6b | `upload-listing.sh` | Upload listing texts + all graphics via the API and commit (owner token) | needs owner token |
-| 7 | `release.sh [build\|listing\|publish\|promote]` | Build signed AAB / push listing / upload / promote (`gradlew`) | no |
-| 8 | `set-data-safety.sh [payload]` | Submit the Data safety declaration (API). Payload format unverified — see script header | no |
+| 7a | `publish-internal.sh` | **Works:** upload AAB + release on a testing track (default internal) via API, owner token | needs owner token |
+| 7b | `release.sh [build\|listing\|publish\|promote]` | Build signed AAB; `listing`/`publish` use GPP and currently fail (see gotcha) — prefer `upload-listing.sh` / `publish-internal.sh` | no |
+| 8 | `set-data-safety.sh <csv>` | Submit Data safety via API. Body is the Console questionnaire CSV (export template first) | needs owner token |
 
 > Prefer **5a** (per-app). Account-level permissions from **5b** apply to *every*
 > app on the developer account.

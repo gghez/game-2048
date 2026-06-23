@@ -89,9 +89,12 @@ The whole automatable procedure is captured, credentials-free, in `scripts/`
 - `enable-github-pages.sh` — host the privacy policy (`gh`)
 - `grant-app-publisher-sa.sh` / `invite-publisher-sa.sh` — grant the SA per-app /
   account-wide Play Console access (Android Publisher API)
-- `release.sh [build|listing|publish|promote]` — build / push store listing /
-  upload AAB / promote (`gradlew` + Gradle Play Publisher)
-- `set-data-safety.sh` — submit Data safety (API; payload format to confirm)
+- `gen-screenshots.sh` — capture phone screenshots on a headless emulator (`adb`)
+- `upload-listing.sh` — push listing texts + all graphics via API, commit (owner token)
+- `publish-internal.sh` — upload AAB + release on a testing track via API (owner token)
+- `release.sh [build|listing|publish|promote]` — build / GPP tasks (listing/publish
+  currently fail — prefer `upload-listing.sh` / `publish-internal.sh`)
+- `set-data-safety.sh <csv>` — submit Data safety (API; body = Console questionnaire CSV)
 
 Store listing text + graphics are versioned under `app/src/main/play/`
 (`listings/fr-FR/…`); edit and push with `release.sh listing`. Scripts read
@@ -115,15 +118,21 @@ notes were wrong; the real blockers were:
   content but its `:commit` returned `403`; committing the submission needs an owner
   token (the ADC login in scripts/README.md).
 
-Committing **sends the changes for review** (no draft mode here). The AAB release
-upload was not attempted via API yet — do it in the Console, or try
-`release.sh publish` with an owner token.
+Committing **sends the changes for review** (no draft mode here).
+
+**AAB release — done on the internal track.** v1 (versionCode 1) was uploaded and
+released `completed` on the `internal` track via `scripts/publish-internal.sh`
+(owner token). One more gotcha: **production rejects `completed` releases on a
+never-published ("draft") app** — `"Only releases with status draft may be created
+on draft app"`. Testing tracks (internal/alpha/beta) accept `completed`, so the
+first real publish goes through a testing track (or the first production publish is
+done in the Console). Internal testers are added by email list in the Console
+(*Test → Internal testing → Testers*); the API only binds Google Groups.
 
 ## Release commands (CLI)
 
 ```bash
-scripts/release.sh build      # build the signed AAB
-./gradlew bootstrapListing    # first time: pull listing metadata into app/src/main/play/
-scripts/release.sh publish    # build + upload the AAB to the internal track
-scripts/release.sh promote    # promote internal -> production (no rebuild)
+scripts/release.sh build         # build the signed AAB
+scripts/publish-internal.sh      # upload AAB + release on the internal track (API)
+TRACK=production scripts/publish-internal.sh   # once the app has been published once
 ```
