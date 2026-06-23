@@ -32,4 +32,16 @@
     <!-- Language selector -->
     <string name="language_title">Lingua</string>
     <string name="language_system">Predefinita di sistema</string>
+
+    <!-- Gameplay tips (rotating carousel) -->
+    <string name="cd_tip">Consiglio</string>
+    <string-array name="game_tips">
+        <item>Tieni la tua tessera più grande in un angolo.</item>
+        <item>Disponi le tessere in ordine decrescente lungo un bordo.</item>
+        <item>Scegli una direzione principale ed evita quella che rovina il tuo angolo.</item>
+        <item>Pensa con due o tre mosse di anticipo.</item>
+        <item>Unisci presto le tessere piccole per liberare spazio.</item>
+        <item>Non scorrere a caso: mantieni una riga ben ordinata.</item>
+        <item>Una griglia piena non è persa: cerca le combinazioni possibili.</item>
+    </string-array>
 </resources>

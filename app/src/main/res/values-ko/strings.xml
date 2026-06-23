@@ -32,4 +32,16 @@
     <!-- Language selector -->
     <string name="language_title">언어</string>
     <string name="language_system">시스템 기본값</string>
+
+    <!-- Gameplay tips (rotating carousel) -->
+    <string name="cd_tip">팁</string>
+    <string-array name="game_tips">
+        <item>가장 큰 타일은 모서리에 두세요.</item>
+        <item>한 가장자리를 따라 타일을 내림차순으로 정렬하세요.</item>
+        <item>주된 방향을 정하고 모서리를 무너뜨리는 방향은 피하세요.</item>
+        <item>두세 수 앞을 내다보세요.</item>
+        <item>작은 타일은 일찍 합쳐 공간을 확보하세요.</item>
+        <item>무작정 밀지 말고 한 줄을 잘 정렬해 두세요.</item>
+        <item>꽉 찬 판도 끝이 아닙니다: 합칠 수 있는 곳을 찾으세요.</item>
+    </string-array>
 </resources>

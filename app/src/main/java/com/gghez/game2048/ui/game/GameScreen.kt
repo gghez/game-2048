@@ -37,10 +37,13 @@ import com.gghez.game2048.domain.GameStatus
 import com.gghez.game2048.ui.components.GameGrid
 import com.gghez.game2048.ui.components.NewGameDialog
 import com.gghez.game2048.ui.components.ScoreCard
+import com.gghez.game2048.ui.components.TipsCarousel
 
 /**
- * Portrait layout: header (title + actions), score row, the square board (sized to
- * the available width), then the footer (timer, undo, move count).
+ * Portrait layout, bottom-anchored for thumb reach: header (title + actions) and a
+ * rotating tips card sit at the top; a flexible spacer then pushes the score row,
+ * the square board (sized to the available width) and the footer (timer, undo, move
+ * count) down to the bottom of the screen.
  */
 @Composable
 fun GameScreen(
@@ -69,12 +72,16 @@ fun GameScreen(
             IconButton(onClick = onOpenSettings) { Icon(Icons.Default.Settings, stringResource(R.string.cd_settings)) }
         }
         Spacer(Modifier.height(8.dp))
-        // Score row
+        // Tips carousel fills the freed-up upper area
+        TipsCarousel(fastAnimations = ui.settings.fastAnimations)
+        // Flexible space pushes the score/board/footer block to the bottom (thumb reach)
+        Spacer(Modifier.weight(1f))
+        // Score row (stuck just above the board)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             ScoreCard(stringResource(R.string.score), ui.state.score, highlighted = true, modifier = Modifier.weight(1f))
             ScoreCard(stringResource(R.string.best_score), ui.bestScore, highlighted = false, modifier = Modifier.weight(1f))
         }
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(8.dp))
         // Grid with win/over overlay
         Box(Modifier.fillMaxWidth()) {
             GameGrid(
@@ -95,7 +102,7 @@ fun GameScreen(
                 GameStatus.PLAYING -> {}
             }
         }
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(8.dp))
         // Footer
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(formatTime(ui.elapsedSeconds), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)

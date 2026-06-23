@@ -32,4 +32,16 @@
     <!-- Language selector -->
     <string name="language_title">שפה</string>
     <string name="language_system">ברירת מחדל של המערכת</string>
+
+    <!-- Gameplay tips (rotating carousel) -->
+    <string name="cd_tip">טיפ</string>
+    <string-array name="game_tips">
+        <item>שמרו את האריח הגדול ביותר בפינה.</item>
+        <item>סדרו את האריחים בסדר יורד לאורך קצה אחד.</item>
+        <item>בחרו כיוון עיקרי והימנעו מהכיוון שהורס את הפינה שלכם.</item>
+        <item>חשבו שניים-שלושה מהלכים קדימה.</item>
+        <item>אחדו אריחים קטנים מוקדם כדי לפנות מקום.</item>
+        <item>אל תחליקו באקראי: שמרו על שורה אחת מסודרת היטב.</item>
+        <item>לוח מלא אינו אבוד: חפשו איחודים אפשריים.</item>
+    </string-array>
 </resources>

@@ -32,4 +32,16 @@
     <!-- Language selector -->
     <string name="language_title">言語</string>
     <string name="language_system">システムの既定</string>
+
+    <!-- Gameplay tips (rotating carousel) -->
+    <string name="cd_tip">ヒント</string>
+    <string-array name="game_tips">
+        <item>一番大きいタイルは隅にキープしましょう。</item>
+        <item>タイルを一辺に沿って大きい順に並べましょう。</item>
+        <item>主な方向を決め、隅を崩す方向は避けましょう。</item>
+        <item>2、3手先を読みましょう。</item>
+        <item>小さいタイルは早めに合体させて空きを作りましょう。</item>
+        <item>むやみにスワイプせず、1列をきれいに保ちましょう。</item>
+        <item>盤面が埋まっても諦めず、合体できる場所を探しましょう。</item>
+    </string-array>
 </resources>

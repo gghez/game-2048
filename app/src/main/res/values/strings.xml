@@ -38,4 +38,16 @@
     <!-- Language selector -->
     <string name="language_title">Language</string>
     <string name="language_system">System default</string>
+
+    <!-- Gameplay tips (rotating carousel) -->
+    <string name="cd_tip">Tip</string>
+    <string-array name="game_tips">
+        <item>Keep your biggest tile in a corner.</item>
+        <item>Line up your tiles in descending order along one edge.</item>
+        <item>Pick a main direction and avoid the one that breaks your corner.</item>
+        <item>Think two or three moves ahead.</item>
+        <item>Merge small tiles early to free up space.</item>
+        <item>Don\'t swipe at random: keep one row well ordered.</item>
+        <item>A full grid isn\'t lost: look for possible merges.</item>
+    </string-array>
 </resources>

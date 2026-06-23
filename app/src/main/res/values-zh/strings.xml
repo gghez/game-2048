@@ -32,4 +32,16 @@
     <!-- Language selector -->
     <string name="language_title">语言</string>
     <string name="language_system">系统默认</string>
+
+    <!-- Gameplay tips (rotating carousel) -->
+    <string name="cd_tip">提示</string>
+    <string-array name="game_tips">
+        <item>把最大的方块留在角落。</item>
+        <item>沿着一条边把方块按从大到小排列。</item>
+        <item>选定一个主方向，避免会破坏角落的那个方向。</item>
+        <item>提前想好两三步。</item>
+        <item>尽早合并小方块以腾出空间。</item>
+        <item>不要随意滑动：保持一行井然有序。</item>
+        <item>棋盘填满也未必输：寻找可以合并的方块。</item>
+    </string-array>
 </resources>
