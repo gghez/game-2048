@@ -5,11 +5,11 @@ Sensitive values (GCP project id, service-account email, Play developer id,
 keystore passwords) are **never** hard-coded here — scripts read them from
 `.store-passwd` at the repo root (git-ignored) or from the environment.
 
-> **First publication is manual.** Google blocks the Publisher API from committing
-> edits until the app's first release is published via the Console (otherwise
-> `403 PERMISSION_DENIED` at commit). `release.sh listing`/`publish`/`promote` and
-> `set-data-safety.sh` only work **after** that first manual publication. For v1,
-> fill the listing and upload the first AAB by hand.
+> **Committing edits:** use an **owner** `androidpublisher` token (the SA's `:commit`
+> returns 403) and **do not** set `changesNotSentForReview` (this app auto-sends for
+> review; the param returns 400). `upload-listing.sh` does this correctly. Gradle
+> Play Publisher sets the param by default, so `release.sh listing` currently fails —
+> prefer `upload-listing.sh` for the store listing.
 
 Run from the repo root. Order for a fresh setup:
 
@@ -21,8 +21,10 @@ Run from the repo root. Order for a fresh setup:
 | 4 | `enable-github-pages.sh` | Host `docs/privacy.md` on GitHub Pages (`gh`) | no |
 | 5a | `grant-app-publisher-sa.sh` | **Preferred:** grant the SA access to ONE app only (least privilege). Requires the app to exist in the Console | needs an owner token (see below) |
 | 5b | `invite-publisher-sa.sh` | Grant the SA **account-wide** publishing access (all apps). Use only if per-app is impractical | needs an owner token (see below) |
-| 6 | `release.sh [build\|listing\|publish\|promote]` | Build signed AAB / push store listing / upload / promote (`gradlew`) | no |
-| 7 | `set-data-safety.sh [payload]` | Submit the Data safety declaration (API). Payload format unverified — see script header | no |
+| 6a | `gen-screenshots.sh` | Capture phone screenshots on a headless emulator (`adb`) | no |
+| 6b | `upload-listing.sh` | Upload listing texts + all graphics via the API and commit (owner token) | needs owner token |
+| 7 | `release.sh [build\|listing\|publish\|promote]` | Build signed AAB / push listing / upload / promote (`gradlew`) | no |
+| 8 | `set-data-safety.sh [payload]` | Submit the Data safety declaration (API). Payload format unverified — see script header | no |
 
 > Prefer **5a** (per-app). Account-level permissions from **5b** apply to *every*
 > app on the developer account.

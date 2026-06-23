@@ -32,9 +32,28 @@ for d in "mdpi 48" "hdpi 72" "xhdpi 96" "xxhdpi 144" "xxxhdpi 192"; do
 done
 
 convert "$SRC" -resize 512x512 "$ASSETS/play-icon-512.png"
-convert -size 1024x500 "xc:$CREAM" \
-  \( -size 380x380 "xc:$GOLD" -font "$FONT" -fill white \
-     -gravity center -pointsize 210 -annotate -46+34 '2' \
-     -gravity center -pointsize 95 -annotate +66-58 '11' \) \
-  -gravity center -composite "$ASSETS/play-feature-1024x500.png"
+
+# Feature graphic (1024x500): 2048-palette number tiles scattered with varied
+# rotations, Boggle-dice style, on a cream background.
+FEAT="$ASSETS/play-feature-1024x500.png"
+TMPD="$(mktemp -d)"; trap 'rm -rf "$TMPD"' EXIT
+convert -size 1024x500 "xc:$CREAM" "$FEAT"
+declare -A COL=( [2]='#eee4da' [4]='#ede0c8' [8]='#f2b179' [16]='#f59563' [32]='#f67c5f' [64]='#f65e3b' [128]='#edcf72' [256]='#edcc61' [512]='#edc850' [1024]='#edc53f' [2048]='#edc22e' )
+# val:cx:cy:angle:size
+tiles=( "2048:512:250:-8:152" "512:165:150:13:112" "128:335:108:-19:100" "64:705:118:21:106" "1024:868:182:-12:122" "8:118:348:-23:94" "32:300:392:16:100" "256:505:430:-9:106" "4:705:408:23:96" "16:892:372:-16:102" "2:66:212:19:86" "8:948:300:9:86" )
+n=0
+for t in "${tiles[@]}"; do
+  IFS=: read -r val cx cy ang sz <<< "$t"
+  if [ "$val" = 2 ] || [ "$val" = 4 ]; then txt='#776e65'; else txt='#f9f6f2'; fi
+  case ${#val} in 1) ps=$((sz*55/100));; 2) ps=$((sz*48/100));; 3) ps=$((sz*38/100));; *) ps=$((sz*30/100));; esac
+  tl="$TMPD/t$n.png"
+  convert -size ${sz}x${sz} xc:none -fill "${COL[$val]}" -draw "roundrectangle 0,0,$((sz-1)),$((sz-1)),$((sz/7)),$((sz/7))" \
+    -font "$FONT" -fill "$txt" -gravity center -pointsize "$ps" -annotate 0 "$val" \
+    -background none -rotate "$ang" +repage "$tl"
+  read -r Wr Hr <<< "$(identify -format '%w %h' "$tl")"
+  x=$((cx - Wr/2)); y=$((cy - Hr/2))
+  [ $x -ge 0 ] && xs="+$x" || xs="$x"; [ $y -ge 0 ] && ys="+$y" || ys="$y"
+  convert "$FEAT" "$tl" -geometry "${xs}${ys}" -composite "$FEAT"
+  n=$((n+1))
+done
 echo "Generated mipmap buckets + store-assets (icon 512, feature 1024x500)."

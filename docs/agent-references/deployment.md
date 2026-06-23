@@ -101,15 +101,25 @@ sensitive values from `.store-passwd` (git-ignored) — never hard-coded.
 audience, app category — these App-content declarations must be filled in the
 Console.
 
-## First publication must be manual (API limitation)
+## Committing edits via the API — two gotchas
 
-Google **blocks the Publisher API from committing edits until the app's first
-release has been published via the Console** (a `release.sh listing`/`publish`
-attempt on a never-published app fails with `403 PERMISSION_DENIED` at the commit
-step, even with a correctly-permissioned SA). So for **v1**, fill the store listing
-and upload the first AAB **by hand** in the Console. The CLI below works for **v2+**.
+The store listing (texts) **and all graphics** (icon, feature, phone + 7"/10" tablet
+screenshots) are pushed via the Publisher API with `scripts/upload-listing.sh` —
+this works even for a never-published app. Earlier "first publish must be manual"
+notes were wrong; the real blockers were:
 
-## Release commands (CLI, for updates after the first manual publication)
+- **Do not set `changesNotSentForReview`** on `:commit`. This app auto-sends changes
+  for review; setting the param returns `400 "must not be set"`. Gradle Play
+  Publisher sets it by default → that is why `release.sh listing` failed.
+- **Use an owner `androidpublisher` token.** The service account could set listing
+  content but its `:commit` returned `403`; committing the submission needs an owner
+  token (the ADC login in scripts/README.md).
+
+Committing **sends the changes for review** (no draft mode here). The AAB release
+upload was not attempted via API yet — do it in the Console, or try
+`release.sh publish` with an owner token.
+
+## Release commands (CLI)
 
 ```bash
 scripts/release.sh build      # build the signed AAB
