@@ -84,19 +84,19 @@ jobs:
       - name: Build signed AAB
         run: ./gradlew bundleRelease
 
-      # Mint an OAuth access token for the publisher service account, scoped to
-      # the Android Publisher API. publish-internal.sh consumes it via ACCESS_TOKEN.
-      - id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
-          token_format: access_token
-          access_token_scopes: https://www.googleapis.com/auth/androidpublisher
-
-      # Reuse the proven publish path (REST API, no changesNotSentForReview).
+      # Mint an Android Publisher access token straight from the SA key (JWT flow
+      # via gcloud, preinstalled on the runner). This avoids the IAM Credentials
+      # API / self-impersonation that google-github-actions/auth's access_token
+      # format requires. The token stays inside this step and feeds the proven
+      # REST publish path (no changesNotSentForReview).
       - name: Release on internal track
         env:
-          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          SA_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           TRACK: internal
           AAB_PATH: app/build/outputs/bundle/release/app-release.aab
-        run: bash scripts/publish-internal.sh
+        run: |
+          printf '%s' "$SA_JSON" > "$RUNNER_TEMP/sa.json"
+          gcloud auth activate-service-account --key-file="$RUNNER_TEMP/sa.json"
+          ACCESS_TOKEN="$(gcloud auth print-access-token \
+            --scopes=https://www.googleapis.com/auth/androidpublisher)" \
+            bash scripts/publish-internal.sh

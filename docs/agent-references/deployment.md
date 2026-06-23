@@ -162,8 +162,11 @@ TRACK=production scripts/publish-internal.sh   # once the app has been published
 `.github/workflows/release.yml` runs on a pushed semver tag (`vX.Y.Z`): it derives
 the version from the tag, restores the upload keystore, writes `local.properties`
 (signing + leaderboard ids), enables the Play Games meta-data, builds a signed AAB,
-mints a service-account access token (`google-github-actions/auth`, `androidpublisher`
-scope) and reuses `scripts/publish-internal.sh` to release on the **internal** track.
+mints an `androidpublisher` access token straight from the SA key (`gcloud auth
+activate-service-account` + `print-access-token --scopes=…` — the JWT flow, which
+avoids the IAM Credentials API / self-impersonation that the `google-github-actions/auth`
+access-token format needs) and reuses `scripts/publish-internal.sh` to release on the
+**internal** track.
 First production publish stays manual; promote internal → production in the Console.
 
 ```bash
