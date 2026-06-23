@@ -24,7 +24,14 @@
   credentials read from `local.properties` (`RELEASE_STORE_FILE`,
   `RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`). When those
   are absent the release build is simply unsigned, so CI/local builds still work.
-  `*.jks` is git-ignored.
+  `*.jks` is git-ignored. **The upload keystore has been generated** (RSA 2048,
+  alias `game2048`, validity ~27 years) and kept outside the repo under the owner's
+  home dir; its credentials live in `.store-passwd` at the repo root (git-ignored)
+  and are mirrored into `local.properties`. A signed AAB builds with
+  `./gradlew bundleRelease` — verified (`jarsigner -verify` → `jar verified`,
+  cert `CN=gghez`). Upload-key SHA-1 (for Play Games OAuth if needed) is recorded in
+  the Play Console after enrollment; recompute with
+  `keytool -list -v -keystore <jks> -alias game2048`.
 - **Gradle Play Publisher 3.11.0** (issue #2): plugin declared in root + app
   `build.gradle.kts`; `play {}` block targets the `internal` track and defaults to
   App Bundles. It reads `play-service-account.json` at the repo root (git-ignored).
@@ -52,9 +59,9 @@
 
 These cannot be scripted from here (interactive secrets or web-only consoles):
 
-1. **Generate the upload keystore** (`keytool`) — pick passwords, store the `.jks`
-   outside the repo, add its path + passwords to `local.properties`. (Interactive,
-   handles secrets.)
+1. **Back up the upload keystore** — the `.jks` and `.store-passwd` exist locally
+   only. Copy them to a safe place; losing the upload key means requesting a reset
+   from Google (possible thanks to Play App Signing).
 2. **Invite the service account** in Play Console → *Users & permissions*: add the
    service-account email above and grant release permissions.
 3. **Create the app entry** in Play Console (name `2exp11`, default language

@@ -12,6 +12,7 @@ local.properties
 # Release signing & Play publishing secrets — never commit
 *.jks
 play-service-account.json
+.store-passwd
 
 # Claude Code worktrees (created locally by the agent harness)
 /.claude/worktrees/
