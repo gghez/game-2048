@@ -27,14 +27,16 @@ Run from the repo root. Order for a fresh setup:
 Play Console permissions are not GCP IAM, so `gcloud` cannot set them and the
 service account cannot grant itself its first access. Step 5 must be authenticated
 as a Play Console **owner/admin** with the `androidpublisher` scope. gcloud's
-built-in OAuth client does not whitelist that scope for `print-access-token`, so
-re-login once with the scope included:
+built-in OAuth client does not whitelist that scope for `print-access-token`, and
+only `application-default login` accepts `--scopes`, so re-login the ADC once with
+the scope included:
 
 ```bash
-gcloud auth login \
-  --scopes=https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/androidpublisher
+gcloud auth application-default login \
+  --scopes=openid,https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/androidpublisher
 ```
 
-Then `scripts/invite-publisher-sa.sh` (which calls `gcloud auth print-access-token`)
-works. You also need `DEVELOPER_ID` (the number in the Play Console URL
+Then `scripts/invite-publisher-sa.sh` (which calls
+`gcloud auth application-default print-access-token`) works. You also need
+`DEVELOPER_ID` (the number in the Play Console URL
 `.../developers/<DEVELOPER_ID>/...`) recorded in `.store-passwd`.

@@ -8,12 +8,12 @@
 # service account cannot grant itself its own first access (chicken-and-egg). The
 # call must be authenticated as a Play Console *owner/admin* (a human Google
 # account) with the scope https://www.googleapis.com/auth/androidpublisher.
-# gcloud's built-in OAuth client does not whitelist that scope for
-# `print-access-token --scopes`, so obtain a token via an interactive re-login
-# that includes the scope, e.g.:
-#   gcloud auth login \
-#     --scopes=https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/androidpublisher
-# After that, `gcloud auth print-access-token` yields an androidpublisher token.
+# Obtain such a token via an interactive ADC re-login that includes the scope
+# (only `application-default login` accepts --scopes):
+#   gcloud auth application-default login \
+#     --scopes=openid,https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/androidpublisher
+# After that, `gcloud auth application-default print-access-token` yields an
+# androidpublisher token. Override with ACCESS_TOKEN=... if you mint it elsewhere.
 #
 # Sensitive values are read from .store-passwd (git-ignored) or the environment:
 #   DEVELOPER_ID           - Play Console developer id (the number in the console
@@ -27,7 +27,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 : "${DEVELOPER_ID:?set DEVELOPER_ID (number in the Play Console URL)}"
 : "${SERVICE_ACCOUNT_EMAIL:?set SERVICE_ACCOUNT_EMAIL}"
 
-TOKEN="${ACCESS_TOKEN:-$(gcloud auth print-access-token)}"
+TOKEN="${ACCESS_TOKEN:-$(gcloud auth application-default print-access-token)}"
 
 # Account-level publishing permissions (least privilege for CI publishing):
 #   CAN_SEE_ALL_APPS                 - see the app(s)
