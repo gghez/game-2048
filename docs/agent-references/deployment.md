@@ -47,11 +47,11 @@
 
 - **GitHub Pages:** enabled from `/docs` on `main`. Privacy policy is live at
   <https://gghez.github.io/game-2048/privacy>.
-- **GCP project:** `<gcp-project>` — dedicated to Play publishing (kept
-  separate from other projects).
-- **Service account:** `<service-account-email>`.
-  Android Publisher API enabled on that project. Its JSON key was generated locally
-  and is git-ignored — it must never be committed.
+- **GCP project:** a dedicated project for Play publishing (id kept out of version
+  control — see `.store-passwd`, git-ignored).
+- **Service account:** a `play-publisher` account in that project, with the Android
+  Publisher API enabled. Its email and the project id are recorded in `.store-passwd`
+  (git-ignored); its JSON key was generated locally and must never be committed.
 - **Google Play Console:** account created and active (owned by the project owner's
   Google account).
 
@@ -63,7 +63,7 @@ These cannot be scripted from here (interactive secrets or web-only consoles):
    only. Copy them to a safe place; losing the upload key means requesting a reset
    from Google (possible thanks to Play App Signing).
 2. **Invite the service account** in Play Console → *Users & permissions*: add the
-   service-account email above and grant release permissions.
+   service-account email (recorded in `.store-passwd`) and grant release permissions.
 3. **Create the app entry** in Play Console (name `2exp11`, default language
    `fr-FR`, type Game, free).
 4. **Questionnaires:** content rating (IARC) and Data safety — declare *no data
