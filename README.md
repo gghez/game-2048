@@ -17,7 +17,7 @@ A free, open-source **2exp11** game for Android — the classic "combine tiles u
 - Portrait orientation only.
 - "New game" confirmation dialog.
 - In-progress game is saved and resumed automatically.
-- Optional **Google Play Games** leaderboards (two boards: best score and best tile).
+- Optional **Google Play Games** leaderboards (three boards: best score, best tile, and fastest time to 2048).
 
 All UI text is in French.
 
