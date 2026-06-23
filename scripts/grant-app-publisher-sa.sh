@@ -23,19 +23,25 @@ auth=(-H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json")
 [ -n "${GCP_PROJECT:-}" ] && auth+=(-H "x-goog-user-project: ${GCP_PROJECT}")
 EMAIL_ENC="${SERVICE_ACCOUNT_EMAIL/@/%40}"
 
-# 1. The user must exist with NO account-level permissions (app-only access).
-#    Create it if absent; ignore "already exists".
-if ! curl -fsS "${auth[@]}" "$API/developers/${DEVELOPER_ID}/users?pageSize=-1" \
-     | jq -e --arg e "$SERVICE_ACCOUNT_EMAIL" '.users[]?|select(.email==$e)' >/dev/null 2>&1; then
-  echo "Creating user (no account-level permissions)..."
-  curl -fsS -X POST "${auth[@]}" "$API/developers/${DEVELOPER_ID}/users" \
-    -d "{\"email\":\"${SERVICE_ACCOUNT_EMAIL}\",\"developerAccountPermissions\":[]}" >/dev/null
-fi
+PERMS='["CAN_MANAGE_PUBLIC_APKS","CAN_MANAGE_TRACK_APKS","CAN_MANAGE_PUBLIC_LISTING"]'
 
-# 2. Grant app-level publishing permissions for this package only.
-echo "Granting app-level access to ${PACKAGE_NAME}..."
-curl -fsS -X POST "${auth[@]}" \
-  "$API/developers/${DEVELOPER_ID}/users/${EMAIL_ENC}/grants" \
-  -d "{\"packageName\":\"${PACKAGE_NAME}\",\"appLevelPermissions\":[\"CAN_MANAGE_PUBLIC_APKS\",\"CAN_MANAGE_TRACK_APKS\",\"CAN_MANAGE_PUBLIC_LISTING\"]}"
+# A user must have at least one permission, so an "app-only" user is created with
+# the grant INLINE (no developerAccountPermissions -> no access to other apps).
+# If the user already exists, add/update the grant for this package instead.
+if curl -fsS "${auth[@]}" "$API/developers/${DEVELOPER_ID}/users?pageSize=-1" \
+     | jq -e --arg e "$SERVICE_ACCOUNT_EMAIL" '.users[]?|select(.email==$e)' >/dev/null 2>&1; then
+  echo "User exists — granting app-level access to ${PACKAGE_NAME}..."
+  curl -fsS -X POST "${auth[@]}" \
+    "$API/developers/${DEVELOPER_ID}/users/${EMAIL_ENC}/grants" \
+    -d "{\"packageName\":\"${PACKAGE_NAME}\",\"appLevelPermissions\":${PERMS}}" \
+  || { echo "grant create failed (already granted?) — patching..."; \
+       curl -fsS -X PATCH "${auth[@]}" \
+         "$API/developers/${DEVELOPER_ID}/users/${EMAIL_ENC}/grants/${PACKAGE_NAME}?updateMask=appLevelPermissions" \
+         -d "{\"appLevelPermissions\":${PERMS}}"; }
+else
+  echo "Creating app-only user with inline grant for ${PACKAGE_NAME}..."
+  curl -fsS -X POST "${auth[@]}" "$API/developers/${DEVELOPER_ID}/users" \
+    -d "{\"email\":\"${SERVICE_ACCOUNT_EMAIL}\",\"grants\":[{\"packageName\":\"${PACKAGE_NAME}\",\"appLevelPermissions\":${PERMS}}]}"
+fi
 echo
 echo "Done. The SA can publish ${PACKAGE_NAME} only — no access to other apps."

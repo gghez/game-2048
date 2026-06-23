@@ -52,10 +52,11 @@
 - **Service account:** a `play-publisher` account in that project, with the Android
   Publisher API enabled. Its email and the project id are recorded in `.store-passwd`
   (git-ignored); its JSON key was generated locally and must never be committed.
-  **Play Console access: not currently granted.** An account-wide grant was applied
-  then **revoked** (it covered every app on the account — too broad). The correct,
-  least-privilege grant is **per-app** (`scripts/grant-app-publisher-sa.sh`), which
-  requires the `2exp11` app to exist first — see remaining steps.
+  **Play Console access: per-app only.** An initial account-wide grant was revoked
+  (too broad — it covered every app). The SA now has a single **app-level grant**
+  on `com.gghez.game2048` (manage production APKs, testing tracks, store presence)
+  and **no account-level permissions**, so it cannot touch any other app. Applied
+  via `scripts/grant-app-publisher-sa.sh` (state `ACCESS_GRANTED`).
 - **Google Play Console:** account created and active (owned by the project owner's
   Google account).
 
@@ -66,18 +67,13 @@ These cannot be scripted from here (interactive secrets or web-only consoles):
 1. **Back up the upload keystore** — the `.jks` and `.store-passwd` exist locally
    only. Copy them to a safe place; losing the upload key means requesting a reset
    from Google (possible thanks to Play App Signing).
-2. **Create the app entry** in Play Console (name `2exp11`, default language
-   `fr-FR`, type Game, free). Required before the per-app SA grant below.
-3. **Grant the SA per-app access** — once the app exists, run
-   `scripts/grant-app-publisher-sa.sh` (needs an owner `androidpublisher` token).
-   This scopes publishing rights to `com.gghez.game2048` only.
-4. **Questionnaires:** content rating (IARC) and Data safety — declare *no data
+2. **Questionnaires:** content rating (IARC) and Data safety — declare *no data
    collected, no tracking*.
-5. **Paste the privacy policy URL** into the store listing.
-6. **Screenshots:** capture from a device (`adb exec-out screencap -p > shot.png`).
+3. **Paste the privacy policy URL** into the store listing.
+4. **Screenshots:** capture from a device (`adb exec-out screencap -p > shot.png`).
    No device was connected during setup, so none were generated.
-7. **Real icon (optional):** replace the placeholder with proper adaptive-icon art.
-8. **Leaderboards (optional, issue #3):** create the Play Games Services config and
+5. **Real icon (optional):** replace the placeholder with proper adaptive-icon art.
+6. **Leaderboards (optional, issue #3):** create the Play Games Services config and
    two leaderboards on the web, put their ids + the numeric App ID in
    `local.properties`, then uncomment the `games.APP_ID` meta-data in
    `AndroidManifest.xml`. The app falls back to `NoopLeaderboard` until then.
