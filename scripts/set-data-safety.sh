@@ -3,13 +3,16 @@
 # (applications.dataSafety). For 2exp11 this declares: no data collected, no data
 # shared, no tracking. No secrets in this file.
 #
-# IMPORTANT — payload format is NOT yet verified here. The endpoint expects a
-# `safetyLabels` string whose format mirrors the Play Console Data safety CSV.
-# Confirm the exact schema against the current API reference before relying on it:
-#   https://developers.google.com/android-publisher/api-ref/rest/v3/applications/dataSafety
-# Put the verified payload in store-config/data-safety.json (git-tracked, no secrets).
+# VERIFIED format: POST body is {"safetyLabels": "<CSV>"} where <CSV> is the Play
+# Console Data safety questionnaire CSV — one row per response, with Google-specific
+# Question IDs and a "Response value" column (TRUE/FALSE). There is no GET and no
+# template via the API: download the sample/export CSV from the Console
+# (App content > Data safety > Export to CSV), fill it, and pass its path here.
+# Ref: https://developers.google.com/android-publisher/api-ref/rest/v3/applications/dataSafety
 # This is the ONLY "App content" declaration with an API; content rating (IARC),
-# ads, app access and target audience remain web-only in the Play Console.
+# ads, app access and target audience remain web-only.
+#
+# Usage: scripts/set-data-safety.sh <filled-data-safety.csv>
 #
 # Reads from .store-passwd (git-ignored) or the environment:
 #   GCP_PROJECT
@@ -19,15 +22,16 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck disable=SC1091
 [ -f "$ROOT/.store-passwd" ] && source "$ROOT/.store-passwd"
 PACKAGE_NAME="${PACKAGE_NAME:-com.gghez.game2048}"
-PAYLOAD="${1:-$ROOT/store-config/data-safety.json}"
+CSV="${1:?usage: $0 <filled-data-safety.csv> (export the template from the Console first)}"
 TOKEN="${ACCESS_TOKEN:-$(gcloud auth application-default print-access-token)}"
 
-[ -f "$PAYLOAD" ] || { echo "Payload not found: $PAYLOAD (see header — provide a verified payload)." >&2; exit 1; }
+[ -f "$CSV" ] || { echo "CSV not found: $CSV" >&2; exit 1; }
+BODY="$(jq -Rs '{safetyLabels: .}' < "$CSV")"
 
 curl -fsS -X POST \
   "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${PACKAGE_NAME}/dataSafety" \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
   ${GCP_PROJECT:+-H "x-goog-user-project: ${GCP_PROJECT}"} \
-  --data-binary "@$PAYLOAD"
+  -d "$BODY"
 echo
-echo "Submitted Data safety from $PAYLOAD."
+echo "Submitted Data safety from $CSV."
