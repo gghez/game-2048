@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,15 +19,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,9 +59,11 @@ fun SettingsBottomSheet(
     onFast: (Boolean) -> Unit,
     onVibration: (Boolean) -> Unit,
     onSound: (Boolean) -> Unit,
+    onLanguage: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showLanguageDialog by remember { mutableStateOf(false) }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
             Modifier
@@ -85,6 +94,83 @@ fun SettingsBottomSheet(
             ToggleRow(stringResource(R.string.sound_title), stringResource(R.string.sound_desc), settings.sound, onSound)
             ToggleRow(stringResource(R.string.fast_anim_title), stringResource(R.string.fast_anim_desc), settings.fastAnimations, onFast)
             ToggleRow(stringResource(R.string.vibration_title), stringResource(R.string.vibration_desc), settings.vibration, onVibration)
+            LanguageRow(current = settings.language) { showLanguageDialog = true }
+        }
+    }
+    if (showLanguageDialog) {
+        LanguageDialog(
+            current = settings.language,
+            onSelect = { tag ->
+                onLanguage(tag)
+                showLanguageDialog = false
+            },
+            onDismiss = { showLanguageDialog = false },
+        )
+    }
+}
+
+/** Tappable row showing the current in-app language; opens the language picker. */
+@Composable
+private fun LanguageRow(current: String, onClick: () -> Unit) {
+    val selected = APP_LANGUAGES.firstOrNull { it.tag == current }
+    val value = if (selected == null) {
+        "🌐 " + stringResource(R.string.language_system)
+    } else {
+        "${selected.flag} ${selected.nativeName}"
+    }
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(stringResource(R.string.language_title), fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+        Text(value, style = MaterialTheme.typography.bodyLarge)
+    }
+}
+
+/** Modal list of "System default" + every shipped language, flag-prefixed. */
+@Composable
+private fun LanguageDialog(current: String, onSelect: (String) -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.language_title)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                LanguageOption(
+                    flag = "🌐",
+                    name = stringResource(R.string.language_system),
+                    selected = current.isEmpty(),
+                ) { onSelect("") }
+                APP_LANGUAGES.forEach { lang ->
+                    LanguageOption(flag = lang.flag, name = lang.nativeName, selected = lang.tag == current) {
+                        onSelect(lang.tag)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+        },
+    )
+}
+
+@Composable
+private fun LanguageOption(flag: String, name: String, selected: Boolean, onClick: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(flag, style = MaterialTheme.typography.titleLarge)
+        Text(name, modifier = Modifier.weight(1f), fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal)
+        if (selected) {
+            Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(20.dp))
         }
     }
 }

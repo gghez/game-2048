@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Languages the app ships UI translations for. Drives the Android 13+
+     per-app language picker. Keep in sync with the values-* folders.
+     Default (values/) is English. Hebrew resources live in values-iw
+     (legacy code the runtime resolves); the BCP-47 tag here is "he". -->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="fr" />
+    <locale android:name="es" />
+    <locale android:name="de" />
+    <locale android:name="it" />
+    <locale android:name="ja" />
+    <locale android:name="ko" />
+    <locale android:name="zh" />
+    <locale android:name="he" />
+</locale-config>

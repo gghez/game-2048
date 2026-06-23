@@ -1,5 +1,7 @@
 package com.gghez.game2048
 
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,16 +18,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.gghez.game2048.data.settings.SettingsRepository
 import com.gghez.game2048.data.settings.ThemeMode
 import com.gghez.game2048.ui.game.GameScreen
 import com.gghez.game2048.ui.game.GameViewModel
 import com.gghez.game2048.ui.settings.SettingsBottomSheet
 import com.gghez.game2048.ui.theme.Game2048Theme
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
 
     private var vm: GameViewModel? = null
+
+    // Apply the persisted in-app language before the UI inflates, so every launch
+    // honours the user's choice. Empty tag = follow the system locale (no override).
+    // The persisted value is tiny, so the blocking read here is effectively instant.
+    override fun attachBaseContext(newBase: Context) {
+        val tag = runBlocking { SettingsRepository(newBase).currentLanguageTag() }
+        super.attachBaseContext(if (tag.isEmpty()) newBase else newBase.withLocale(tag))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +85,14 @@ class MainActivity : ComponentActivity() {
                         onFast = viewModel::setFast,
                         onVibration = viewModel::setVibration,
                         onSound = viewModel::setSound,
+                        onLanguage = { tag ->
+                            // Persist first, then recreate so attachBaseContext re-applies
+                            // the new locale to the whole Activity.
+                            lifecycleScope.launch {
+                                app.container.settingsRepo.setLanguage(tag)
+                                recreate()
+                            }
+                        },
                         onDismiss = { showSettings = false },
                     )
                 }
@@ -92,4 +115,17 @@ class MainActivity : ComponentActivity() {
         (application as Game2048App).container.leaderboard.attach(null)
         super.onDestroy()
     }
+}
+
+/**
+ * Return a context configured for [tag]. Uses the Locale(tag) constructor (not
+ * forLanguageTag) so the legacy Hebrew tag "iw" is preserved and resolves to
+ * res/values-iw; setLocale also flips layout direction for RTL languages.
+ */
+private fun Context.withLocale(tag: String): Context {
+    val locale = Locale(tag)
+    Locale.setDefault(locale)
+    val config = Configuration(resources.configuration)
+    config.setLocale(locale)
+    return createConfigurationContext(config)
 }

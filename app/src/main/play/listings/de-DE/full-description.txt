@@ -1,0 +1,21 @@
+2exp11 ist ein Kachel-Verschmelzungs-Puzzlespiel: Wische, kombiniere gleiche Zahlen und versuche, die Kachel 2¹¹ (2048) zu erreichen.
+
+Einfache Regeln, sofort spielbar und eine Herausforderung, die mit jedem Verschmelzen wächst. Perfekt für eine schnelle Runde oder eine lange, durchdachte Spielsitzung.
+
+EIN ECHTES GESCHENK, FÜR IMMER
+• Keine Werbung
+• Keine In-App-Käufe
+• Kein Tracking, keine Datensammlung
+• Gratis und Open Source (MIT license)
+
+FUNKTIONEN
+• Flüssiges Gleiten und feine Kachel-Animationen
+• Punktzahl und Bestleistung werden auf dem Gerät gespeichert
+• „Rückgängig"-Schaltfläche, um deinen letzten Zug zurückzunehmen
+• Helles oder dunkles Design, deine Wahl
+• Optionale Vibration und Ton bei jedem Zug
+• Optionale Google-Play-Bestenlisten (nie erforderlich)
+
+2exp11 sammelt keine personenbezogenen Daten und sendet nichts an Dritte. Alles bleibt auf deinem Gerät.
+
+Viel Spaß!

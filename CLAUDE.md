@@ -38,8 +38,11 @@ purpose of this project and must be rejected.
 
 ## Conventions
 
-- Code, docs, and comments in English; user-facing strings in French
-  (`res/values/strings.xml`), accents included.
+- Code, docs, and comments in English. User-facing strings are localized: the
+  default `res/values/strings.xml` is English; translations live in `res/values-<lang>/`
+  (fr, es, de, it, ja, ko, zh, iw — Hebrew uses the legacy `iw` folder). Keep every
+  locale in sync and accents/scripts correct. Shipped languages are declared in
+  `res/xml/locales_config.xml`.
 - No paid or tracking dependencies, ever.
 - Domain logic stays Android-free and unit-tested.
 - When you change anything deployment-related (signing, publishing, store assets,

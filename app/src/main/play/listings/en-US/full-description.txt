@@ -1,0 +1,21 @@
+2exp11 is a tile-merging puzzle game: swipe, combine matching numbers and try to reach the 2¹¹ (2048) tile.
+
+Simple rules, instant pick-up-and-play, and a challenge that builds with every merge. Perfect for a quick round or a long, thoughtful session.
+
+A REAL GIFT, FOREVER
+• No advertising
+• No in-app purchases
+• No tracking, no data collection
+• Free and open source (MIT license)
+
+FEATURES
+• Smooth sliding and polished tile animations
+• Score and best score kept on the device
+• "Undo" button to take back your last move
+• Light or dark theme, your choice
+• Optional vibration and sound on every move
+• Optional Google Play leaderboards (never required)
+
+2exp11 collects no personal data and sends nothing to third parties. Everything stays on your device.
+
+Enjoy!

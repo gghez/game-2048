@@ -7,7 +7,9 @@ paths:
 # UI: strings & animation
 
 - No hard-coded user-facing text in composables. Every visible string goes in
-  `res/values/strings.xml`, in French, with correct accents.
+  `res/values/strings.xml` (English default) and is mirrored in each
+  `res/values-<lang>/strings.xml`, with correct accents/scripts. The in-app
+  language override is applied in `MainActivity.attachBaseContext`.
 - Composables stay stateless: read from `GameUiState`, send events to the
   ViewModel. Do not put game logic in the UI.
 - Keep tiles keyed by their stable id and positioned absolutely so movement

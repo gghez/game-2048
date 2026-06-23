@@ -116,9 +116,13 @@ The whole automatable procedure is captured, credentials-free, in `scripts/`
   currently fail — prefer `upload-listing.sh` / `publish-internal.sh`)
 - `set-data-safety.sh <csv>` — submit Data safety (API; body = Console questionnaire CSV)
 
-Store listing text + graphics are versioned under `app/src/main/play/`
-(`listings/fr-FR/…`); edit and push with `release.sh listing`. Scripts read
-sensitive values from `.store-passwd` (git-ignored) — never hard-coded.
+Store listing text + graphics are versioned under `app/src/main/play/`.
+The store default language is `fr-FR` (`default-language.txt`). Localized text
+listings exist for `fr-FR`, `en-US`, `es-ES`, `de-DE`, `it-IT`, `ja-JP`, `ko-KR`,
+`zh-CN`, and `iw-IL` (Hebrew uses Google's legacy `iw` code). Only `fr-FR` carries
+graphics; the other languages reuse the default-language graphics on Play until
+localized screenshots are added. Edit and push with `upload-listing.sh`. Scripts
+read sensitive values from `.store-passwd` (git-ignored) — never hard-coded.
 
 **Still web-only (no API):** content rating (IARC), Ads, App access, Target
 audience, app category — these App-content declarations must be filled in the

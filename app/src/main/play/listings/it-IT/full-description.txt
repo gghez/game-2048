@@ -1,0 +1,21 @@
+2exp11 è un puzzle di unione delle tessere: scorri, combina i numeri uguali e prova a raggiungere la tessera 2¹¹ (2048).
+
+Regole semplici, gioco immediato e una sfida che cresce a ogni unione. Perfetto per una partita veloce o per una sessione lunga e ragionata.
+
+UN VERO REGALO, PER SEMPRE
+• Nessuna pubblicità
+• Nessun acquisto in-app
+• Nessun tracciamento, nessuna raccolta di dati
+• Gratis e open source (MIT license)
+
+CARATTERISTICHE
+• Scorrimento fluido e animazioni curate delle tessere
+• Punteggio e miglior punteggio salvati sul dispositivo
+• Pulsante "Annulla" per ritirare l'ultima mossa
+• Tema chiaro o scuro, a tua scelta
+• Vibrazione e audio opzionali a ogni mossa
+• Classifiche Google Play opzionali (mai obbligatorie)
+
+2exp11 non raccoglie dati personali e non invia nulla a terze parti. Tutto resta sul tuo dispositivo.
+
+Buon divertimento!

@@ -12,4 +12,6 @@ Stance for this package:
 - Digit size is proportional to the tile (system font, no bundled typeface) so the
   numbers fill the tile like the design and stay consistent across sizes.
 - Theme (light/dark) follows the in-app setting, not the system.
-- All visible text comes from `res/values/strings.xml` (French).
+- All visible text comes from `res/values/strings.xml` (English default), mirrored
+  per locale in `res/values-<lang>/`. Users can override the language in Settings
+  (persisted; applied in `MainActivity.attachBaseContext`).

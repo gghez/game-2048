@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">2exp11</string>
+    <!-- Score row -->
+    <string name="score">ניקוד</string>
+    <string name="best_score">השיא</string>
+    <string name="moves_suffix">מהלכים</string>
+    <!-- Header content descriptions -->
+    <string name="cd_leaderboard">טבלאות מובילים</string>
+    <string name="cd_restart">משחק חדש</string>
+    <string name="cd_settings">הגדרות</string>
+    <!-- New game dialog -->
+    <string name="new_game_title">משחק חדש</string>
+    <string name="new_game_body">להתחיל משחק חדש? המשחק הנוכחי יימחק לצמיתות.</string>
+    <string name="start">התחלה</string>
+    <string name="cancel">ביטול</string>
+    <!-- Settings -->
+    <string name="settings_title">הגדרות</string>
+    <string name="theme_light">ערכת נושא בהירה</string>
+    <string name="theme_dark">ערכת נושא כהה</string>
+    <string name="fast_anim_title">האצת אנימציות</string>
+    <string name="fast_anim_desc">שרשור צירופים מהיר יותר.</string>
+    <string name="vibration_title">הפעלת רטט</string>
+    <string name="vibration_desc">רטט בכל מהלך.</string>
+    <string name="sound_title">הפעלת צליל</string>
+    <string name="sound_desc">צליל קטן בכל מהלך.</string>
+    <!-- Game state -->
+    <string name="undo">ביטול מהלך</string>
+    <string name="you_win">ניצחת!</string>
+    <string name="continue_playing">המשך</string>
+    <string name="game_over">המשחק נגמר</string>
+    <string name="leaderboard_unavailable">טבלת המובילים אינה זמינה</string>
+    <!-- Language selector -->
+    <string name="language_title">שפה</string>
+    <string name="language_system">ברירת מחדל של המערכת</string>
+</resources>

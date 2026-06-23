@@ -1,0 +1,21 @@
+2exp11 es un juego de puzle de combinar fichas: desliza, junta los números iguales e intenta alcanzar la ficha 2¹¹ (2048).
+
+Reglas sencillas, listo para jugar al instante y un desafío que crece con cada combinación. Perfecto para una partida rápida o una sesión larga y reflexiva.
+
+UN VERDADERO REGALO, PARA SIEMPRE
+• Sin publicidad
+• Sin compras dentro de la aplicación
+• Sin seguimiento ni recopilación de datos
+• Gratis y de código abierto (licencia MIT)
+
+CARACTERÍSTICAS
+• Deslizamiento fluido y animaciones de fichas pulidas
+• Puntuación y mejor puntuación guardadas en el dispositivo
+• Botón «Deshacer» para retroceder tu último movimiento
+• Tema claro u oscuro, a tu elección
+• Vibración y sonido opcionales en cada movimiento
+• Clasificaciones de Google Play opcionales (nunca obligatorias)
+
+2exp11 no recopila ningún dato personal y no envía nada a terceros. Todo se queda en tu dispositivo.
+
+¡Disfruta!

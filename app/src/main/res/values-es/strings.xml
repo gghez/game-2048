@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">2exp11</string>
+
+    <!-- Score row -->
+    <string name="score">PUNTOS</string>
+    <string name="best_score">MEJOR PUNTUACIÓN</string>
+    <string name="moves_suffix">MOVIMIENTOS</string>
+
+    <!-- Header content descriptions -->
+    <string name="cd_leaderboard">Clasificaciones</string>
+    <string name="cd_restart">Partida nueva</string>
+    <string name="cd_settings">Ajustes</string>
+
+    <!-- New game dialog -->
+    <string name="new_game_title">Partida nueva</string>
+    <string name="new_game_body">¿Seguro que quieres empezar una partida nueva? La partida actual se perderá de forma permanente.</string>
+    <string name="start">EMPEZAR</string>
+    <string name="cancel">CANCELAR</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Ajustes</string>
+    <string name="theme_light">Tema claro</string>
+    <string name="theme_dark">Tema oscuro</string>
+    <string name="fast_anim_title">Acelerar las animaciones</string>
+    <string name="fast_anim_desc">Encadena combos más rápido.</string>
+    <string name="vibration_title">Activar la vibración</string>
+    <string name="vibration_desc">Una vibración en cada movimiento.</string>
+    <string name="sound_title">Activar el sonido</string>
+    <string name="sound_desc">Un pequeño sonido en cada movimiento.</string>
+
+    <!-- Game state -->
+    <string name="undo">Deshacer</string>
+    <string name="you_win">¡Has ganado!</string>
+    <string name="continue_playing">Continuar</string>
+    <string name="game_over">Fin de la partida</string>
+    <string name="leaderboard_unavailable">Clasificación no disponible</string>
+
+    <!-- Language selector -->
+    <string name="language_title">Idioma</string>
+    <string name="language_system">Predeterminado del sistema</string>
+</resources>

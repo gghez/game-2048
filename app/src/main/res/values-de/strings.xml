@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">2exp11</string>
+    <!-- Score row -->
+    <string name="score">SCORE</string>
+    <string name="best_score">BEST SCORE</string>
+    <string name="moves_suffix">MOVES</string>
+    <!-- Header content descriptions -->
+    <string name="cd_leaderboard">Bestenlisten</string>
+    <string name="cd_restart">Neues Spiel</string>
+    <string name="cd_settings">Einstellungen</string>
+    <!-- New game dialog -->
+    <string name="new_game_title">Neues Spiel</string>
+    <string name="new_game_body">Möchtest du wirklich ein neues Spiel starten? Das aktuelle Spiel geht dauerhaft verloren.</string>
+    <string name="start">START</string>
+    <string name="cancel">CANCEL</string>
+    <!-- Settings -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="theme_light">Helles Design</string>
+    <string name="theme_dark">Dunkles Design</string>
+    <string name="fast_anim_title">Animationen beschleunigen</string>
+    <string name="fast_anim_desc">Combos schneller verketten.</string>
+    <string name="vibration_title">Vibration aktivieren</string>
+    <string name="vibration_desc">Eine Vibration bei jedem Zug.</string>
+    <string name="sound_title">Ton aktivieren</string>
+    <string name="sound_desc">Ein kleiner Ton bei jedem Zug.</string>
+    <!-- Game state -->
+    <string name="undo">Rückgängig</string>
+    <string name="you_win">Gewonnen!</string>
+    <string name="continue_playing">Weiter</string>
+    <string name="game_over">Spiel vorbei</string>
+    <string name="leaderboard_unavailable">Bestenliste nicht verfügbar</string>
+    <!-- Language selector -->
+    <string name="language_title">Sprache</string>
+    <string name="language_system">Systemstandard</string>
+</resources>
