@@ -52,6 +52,9 @@
 - **Service account:** a `play-publisher` account in that project, with the Android
   Publisher API enabled. Its email and the project id are recorded in `.store-passwd`
   (git-ignored); its JSON key was generated locally and must never be committed.
+  It has been **granted Play Console access** (state `ACCESS_GRANTED`) with
+  publishing permissions (manage production APKs, testing tracks, store presence)
+  via `scripts/invite-publisher-sa.sh`.
 - **Google Play Console:** account created and active (owned by the project owner's
   Google account).
 
@@ -62,22 +65,15 @@ These cannot be scripted from here (interactive secrets or web-only consoles):
 1. **Back up the upload keystore** — the `.jks` and `.store-passwd` exist locally
    only. Copy them to a safe place; losing the upload key means requesting a reset
    from Google (possible thanks to Play App Signing).
-2. **Grant the service account Play Console access.** Scriptable via the Android
-   Publisher API — `scripts/invite-publisher-sa.sh` — but it needs an *owner* token
-   with the `androidpublisher` scope (Play Console permissions are not GCP IAM, and
-   the SA cannot grant itself its first access). gcloud's built-in OAuth client does
-   not whitelist that scope, so re-login once with it (see `scripts/README.md`).
-   Alternatively, do it in the web UI (*Users & permissions* → invite the SA email
-   from `.store-passwd`, grant Releases + Store presence).
-3. **Create the app entry** in Play Console (name `2exp11`, default language
+2. **Create the app entry** in Play Console (name `2exp11`, default language
    `fr-FR`, type Game, free).
-4. **Questionnaires:** content rating (IARC) and Data safety — declare *no data
+3. **Questionnaires:** content rating (IARC) and Data safety — declare *no data
    collected, no tracking*.
-5. **Paste the privacy policy URL** into the store listing.
-6. **Screenshots:** capture from a device (`adb exec-out screencap -p > shot.png`).
+4. **Paste the privacy policy URL** into the store listing.
+5. **Screenshots:** capture from a device (`adb exec-out screencap -p > shot.png`).
    No device was connected during setup, so none were generated.
-7. **Real icon (optional):** replace the placeholder with proper adaptive-icon art.
-8. **Leaderboards (optional, issue #3):** create the Play Games Services config and
+6. **Real icon (optional):** replace the placeholder with proper adaptive-icon art.
+7. **Leaderboards (optional, issue #3):** create the Play Games Services config and
    two leaderboards on the web, put their ids + the numeric App ID in
    `local.properties`, then uncomment the `games.APP_ID` meta-data in
    `AndroidManifest.xml`. The app falls back to `NoopLeaderboard` until then.
