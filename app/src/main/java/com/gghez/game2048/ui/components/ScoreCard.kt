@@ -24,7 +24,7 @@ fun ScoreCard(label: String, value: Int, highlighted: Boolean, modifier: Modifie
             .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.onBackground.copy(alpha = if (highlighted) 0.05f else 0.0f))
             .border(1.dp, border, RoundedCornerShape(12.dp))
-            .padding(vertical = 12.dp, horizontal = 16.dp),
+            .padding(vertical = 6.dp, horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
