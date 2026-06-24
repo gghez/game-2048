@@ -38,6 +38,10 @@ jobs:
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
+          # Public-repo hardening: restrict the PR comment context to the owner
+          # and drop bots, so third-party comments cannot inject instructions.
+          include_comments_by_actor: "gghez"
+          exclude_comments_by_actor: "*[bot]"
           # Pin Opus 4.8 at high reasoning effort for reviews.
           # See https://code.claude.com/docs/en/cli-reference for available options.
           claude_args: |
