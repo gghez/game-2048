@@ -28,8 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.gghez.game2048.R
 import com.gghez.game2048.data.settings.ThemeMode
@@ -67,7 +73,7 @@ fun GameScreen(
     ) {
         // Header
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            AppTitle()
             Spacer(Modifier.weight(1f))
             IconButton(onClick = onOpenLeaderboard) { Icon(Icons.Default.EmojiEvents, stringResource(R.string.cd_leaderboard)) }
             IconButton(onClick = onNewGame) { Icon(Icons.Default.Refresh, stringResource(R.string.cd_restart)) }
@@ -151,6 +157,34 @@ private fun BoxScope.Overlay(title: String, actions: @Composable () -> Unit) {
             actions()
         }
     }
+}
+
+/**
+ * The app wordmark rendered as the mathematical notation 2¹¹ (= 2048): the digits after the
+ * "exp" separator in the app name are shown as a smaller, raised superscript. Falls back to
+ * the raw name if it has no "exp" separator.
+ */
+@Composable
+private fun AppTitle(modifier: Modifier = Modifier) {
+    val name = stringResource(R.string.app_name)
+    val separator = "exp"
+    val rendered = if (name.contains(separator)) {
+        val (base, exponent) = name.split(separator, limit = 2)
+        buildAnnotatedString {
+            append(base)
+            withStyle(SpanStyle(baselineShift = BaselineShift.Superscript, fontSize = 0.6.em)) {
+                append(exponent)
+            }
+        }
+    } else {
+        AnnotatedString(name)
+    }
+    Text(
+        rendered,
+        modifier = modifier,
+        style = MaterialTheme.typography.titleLarge,
+        fontWeight = FontWeight.Bold,
+    )
 }
 
 private fun formatTime(seconds: Long): String {
