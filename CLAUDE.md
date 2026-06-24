@@ -57,3 +57,5 @@ purpose of this project and must be rejected.
 - Path-scoped rules Claude must follow: `.claude/rules/`.
 - Deployment state & how the app ships: `docs/agent-references/deployment.md`
   (step-by-step CLI procedures stay in GitHub issues labelled `deployment`).
+- Why the publishing stack is shaped this way (approach comparison, 2026
+  best-practice rationale): `docs/agent-references/play-publishing-research.md`.
