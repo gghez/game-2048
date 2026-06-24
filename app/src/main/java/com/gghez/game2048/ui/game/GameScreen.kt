@@ -107,8 +107,10 @@ fun GameScreen(
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(formatTime(ui.elapsedSeconds), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             Spacer(Modifier.weight(1f))
-            if (ui.canUndo) {
-                IconButton(onClick = onUndo) { Icon(Icons.AutoMirrored.Filled.Undo, stringResource(R.string.undo)) }
+            // Always render the button (disabled when there is nothing to undo) so the
+            // footer keeps a constant height and the board never shifts on undo.
+            IconButton(onClick = onUndo, enabled = ui.canUndo) {
+                Icon(Icons.AutoMirrored.Filled.Undo, stringResource(R.string.undo))
             }
             Text("${ui.state.moves} ${stringResource(R.string.moves_suffix)}", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
         }
