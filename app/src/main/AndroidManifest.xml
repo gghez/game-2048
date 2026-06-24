@@ -3,6 +3,13 @@
 
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!--
+      allowBackup below is intentionally kept true (an explicit decision, not just the
+      framework default). Android Auto Backup then includes our DataStore prefs
+      (best score, settings, in-progress saved game) so progress survives a device
+      migration or reinstall. The app collects and transmits nothing, so backing up
+      this purely local data carries no privacy cost. Rationale: docs/privacy.md.
+    -->
     <application
         android:name=".Game2048App"
         android:allowBackup="true"

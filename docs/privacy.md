@@ -19,6 +19,17 @@ the game is fully playable without signing in.
 The app requests the `VIBRATE` permission solely to provide haptic feedback on
 moves. It is used on-device only and sends nothing anywhere.
 
+## Backup
+
+`android:allowBackup` is intentionally set to `true`. Android Auto Backup therefore
+includes the app's local data — your best score, settings and in-progress game
+(stored in DataStore) — so your progress survives a device migration or reinstall.
+This data never leaves your device for us or any third party; Auto Backup is handled
+by the Android platform under your Google account, governed by
+[Google's Privacy Policy](https://policies.google.com/privacy). Because the app
+collects and transmits nothing, backing up this purely local data carries no privacy
+cost while preserving the player's progress.
+
 ## Contact
 
 Questions about this policy: gregory.ghez@gmail.com
