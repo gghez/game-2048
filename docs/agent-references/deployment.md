@@ -45,9 +45,12 @@
   cert `CN=gghez`). Upload-key SHA-1 (for Play Games OAuth if needed) is recorded in
   the Play Console after enrollment; recompute with
   `keytool -list -v -keystore <jks> -alias game2048`.
-- **Gradle Play Publisher 3.11.0** (issue #2): plugin declared in root + app
-  `build.gradle.kts`; `play {}` block targets the `internal` track and defaults to
-  App Bundles. It reads `play-service-account.json` at the repo root (git-ignored).
+- **Upload & listing via the REST Publisher API** (issue #2, reworked by #15):
+  Gradle Play Publisher was **removed** — its `listing`/`publish` tasks failed
+  (`changesNotSentForReview` 400) and it is in maintenance mode. The canonical paths
+  are now `scripts/publish-internal.sh` (AAB → track) and `scripts/upload-listing.sh`
+  (store listing), both plain REST. The token rule lives once in
+  `scripts/lib/play-api.sh`.
 - **Launcher icon + store graphics** (issue #5): a `2¹¹` placeholder generated with
   ImageMagick. Density buckets in `app/src/main/res/mipmap-*/` (`ic_launcher.png` +
   `ic_launcher_round.png`); source art and store assets in `store-assets/`
@@ -77,7 +80,8 @@
   (too broad — it covered every app). The SA now has a single **app-level grant**
   on `com.gghez.game2048` (manage production APKs, testing tracks, store presence)
   and **no account-level permissions**, so it cannot touch any other app. Applied
-  via `scripts/grant-app-publisher-sa.sh` (state `ACCESS_GRANTED`).
+  via `scripts/grant-publisher-sa.sh` (per-app default; `--account-wide` is the
+  opt-in broad grant).
 - **Google Play Console:** account created and active (owned by the project owner's
   Google account).
 
@@ -122,18 +126,23 @@ These cannot be scripted from here (interactive secrets or web-only consoles):
 The whole automatable procedure is captured, credentials-free, in `scripts/`
 (see `scripts/README.md` for the ordered table and prerequisites):
 
-- `create-publisher-sa.sh` — GCP project + service account + key + API (`gcloud`)
+- `create-publisher-sa.sh` — GCP project + service account + API (`gcloud`); keyless
+  by default (no JSON key — `--with-key` for the legacy key flow)
+- `setup-wif.sh` — Workload Identity Federation pool/provider/binding so CI auths
+  keyless (`gcloud`); prints the `WIF_PROVIDER` / `WIF_SERVICE_ACCOUNT` values
 - `gen-upload-keystore.sh` — upload keystore + passwords → `.store-passwd` (`keytool`)
 - `gen-store-assets.sh` — launcher icon + store graphics (`ImageMagick`)
 - `enable-github-pages.sh` — host the privacy policy (`gh`)
-- `grant-app-publisher-sa.sh` / `invite-publisher-sa.sh` — grant the SA per-app /
-  account-wide Play Console access (Android Publisher API)
+- `grant-publisher-sa.sh [--account-wide]` — grant the SA Play Console access,
+  per-app by default (Android Publisher API)
 - `gen-screenshots.sh` — capture phone screenshots on a headless emulator (`adb`)
 - `upload-listing.sh` — push listing texts + all graphics via API, commit (owner token)
 - `publish-internal.sh` — upload AAB + release on a testing track via API (owner token)
-- `release.sh [build|listing|publish|promote]` — build / GPP tasks (listing/publish
-  currently fail — prefer `upload-listing.sh` / `publish-internal.sh`)
+- `release.sh [build|publish|listing]` — convenience wrapper over the canonical
+  paths (Gradle build; `publish`/`listing` delegate to the REST scripts above)
 - `set-data-safety.sh <csv>` — submit Data safety (API; body = Console questionnaire CSV)
+- `lib/play-api.sh` — sourced helper: the single source of truth for the
+  owner-vs-CI/WIF token rule and the API auth headers
 
 Store listing text + graphics are versioned under `app/src/main/play/`.
 The store default language is `fr-FR` (`default-language.txt`). Localized text
@@ -156,7 +165,8 @@ notes were wrong; the real blockers were:
 
 - **Do not set `changesNotSentForReview`** on `:commit`. This app auto-sends changes
   for review; setting the param returns `400 "must not be set"`. Gradle Play
-  Publisher sets it by default → that is why `release.sh listing` failed.
+  Publisher set it by default — that is why GPP failed here and was removed (#15);
+  the REST scripts simply omit it.
 - **Use an owner `androidpublisher` token.** The service account could set listing
   content but its `:commit` returned `403`; committing the submission needs an owner
   token (the ADC login in scripts/README.md).
@@ -185,11 +195,10 @@ TRACK=production scripts/publish-internal.sh   # once the app has been published
 `.github/workflows/release.yml` runs on a pushed semver tag (`vX.Y.Z`): it derives
 the version from the tag, restores the upload keystore, writes `local.properties`
 (signing + leaderboard ids), enables the Play Games meta-data, builds a signed AAB,
-mints an `androidpublisher` access token straight from the SA key (`gcloud auth
-activate-service-account` + `print-access-token --scopes=…` — the JWT flow, which
-avoids the IAM Credentials API / self-impersonation that the `google-github-actions/auth`
-access-token format needs) and reuses `scripts/publish-internal.sh` to release on the
-**internal** track.
+**authenticates keyless via Workload Identity Federation** (`google-github-actions/auth`
+exchanges the runner's GitHub OIDC token for a ~1h GCP token minted with the
+`androidpublisher` scope) and reuses `scripts/publish-internal.sh` to release on the
+**internal** track. No long-lived service-account key is stored anywhere.
 First production publish stays manual; promote internal → production in the Console.
 
 ```bash
@@ -202,15 +211,34 @@ git tag v1.1.0 && git push origin v1.1.0   # triggers the release workflow
 |--------|-------|
 | `UPLOAD_KEYSTORE_BASE64` | `base64 -w0 <upload.jks>` |
 | `RELEASE_STORE_PASSWORD` / `RELEASE_KEY_ALIAS` / `RELEASE_KEY_PASSWORD` | from `.store-passwd` |
-| `PLAY_SERVICE_ACCOUNT_JSON` | full contents of the publisher SA key JSON |
+| `WIF_PROVIDER` | WIF provider resource name (output of `scripts/setup-wif.sh`) |
+| `WIF_SERVICE_ACCOUNT` | the `play-publisher` SA email to impersonate |
 | `PLAY_GAMES_APP_ID` | numeric Play Games App ID |
 | `LEADERBOARD_SPEED` / `LEADERBOARD_EFFICIENCY` / `LEADERBOARD_TIME` | the three board ids |
 
-**Verified end-to-end:** tag `v1.1.0` built and released versionCode 10100 on the
-internal track through the workflow (`committed edit …` succeeded). The SA's `:commit`
-works with the per-app grant + a **gcloud-minted** `androidpublisher` token; the
-earlier `403` was the store-listing review commit, a different operation. Token note:
-`google-github-actions/auth`'s `access_token` format routes through the IAM Credentials
-API and needs the SA to impersonate itself (`iam.serviceAccounts.getAccessToken`) —
-which fails — so the workflow mints the token straight from the SA key with
-`gcloud auth activate-service-account` + `print-access-token --scopes=…` instead.
+There is **no `PLAY_SERVICE_ACCOUNT_JSON` secret** — WIF replaced the long-lived key.
+
+### Migration status (issue #15) — WIF cutover not yet verified
+
+The workflow was switched from the SA-key flow to WIF, but the live cutover needs
+three steps that require GCP access + a real release, in order:
+
+1. **Create the WIF resources:** `scripts/setup-wif.sh` (pool + provider with the
+   mandatory `assertion.repository == 'gghez/game-2048'` condition + the
+   `roles/iam.workloadIdentityUser` binding on the SA), then record `WIF_PROVIDER`
+   in `.store-passwd` and push `WIF_PROVIDER` / `WIF_SERVICE_ACCOUNT` with
+   `scripts/set-github-secrets.sh`.
+2. **Verify** by pushing a throwaway-patch tag and confirming the release job goes
+   green. **Watch for the self-impersonation trap:** the old SA-key `access_token`
+   path failed because the SA had to impersonate *itself*
+   (`iam.serviceAccounts.getAccessToken`). WIF should *not* reproduce it — the
+   federated principal (not the SA) holds `workloadIdentityUser` and mints the
+   token — but this is the one thing to confirm before trusting the new path.
+3. **Once green,** delete the now-unused `PLAY_SERVICE_ACCOUNT_JSON` GitHub secret
+   and any local `play-service-account.json`. Until then the old secret lingers
+   harmlessly and the workflow can be reverted for rollback.
+
+**Previously verified (SA-key path, superseded):** tag `v1.1.0` built and released
+versionCode 10100 on the internal track (`committed edit …`). The SA's `:commit`
+works with the per-app grant; the earlier `403` was the store-listing review commit,
+a different operation.
