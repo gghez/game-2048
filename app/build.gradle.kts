@@ -4,7 +4,6 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("com.github.triplet.play")
 }
 
 // Local, never-committed config: signing credentials and optional Play Games ids.
@@ -107,13 +106,4 @@ dependencies {
     implementation("com.google.android.gms:play-services-games-v2:21.0.0")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test:2.0.21")
-}
-
-// Gradle Play Publisher: CLI-driven uploads to Google Play.
-// The service-account JSON is git-ignored; when it is missing the plugin tasks
-// simply fail at call time, so normal builds are unaffected.
-play {
-    serviceAccountCredentials.set(rootProject.file("play-service-account.json"))
-    defaultToAppBundles.set(true)
-    track.set("internal")
 }

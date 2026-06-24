@@ -18,20 +18,18 @@
 #   GCP_PROJECT
 #   PACKAGE_NAME  - app package (default: com.gghez.game2048)
 set -euo pipefail
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-# shellcheck disable=SC1091
-[ -f "$ROOT/.store-passwd" ] && source "$ROOT/.store-passwd"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/play-api.sh"
+play_load_env
+play_api_init
 PACKAGE_NAME="${PACKAGE_NAME:-com.gghez.game2048}"
 CSV="${1:?usage: $0 <filled-data-safety.csv> (export the template from the Console first)}"
-TOKEN="${ACCESS_TOKEN:-$(gcloud auth application-default print-access-token)}"
 
 [ -f "$CSV" ] || { echo "CSV not found: $CSV" >&2; exit 1; }
 BODY="$(jq -Rs '{safetyLabels: .}' < "$CSV")"
 
 curl -fsS -X POST \
   "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${PACKAGE_NAME}/dataSafety" \
-  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-  ${GCP_PROJECT:+-H "x-goog-user-project: ${GCP_PROJECT}"} \
+  "${PLAY_AUTH[@]}" -H "Content-Type: application/json" \
   -d "$BODY"
 echo
 echo "Submitted Data safety from $CSV."

@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
-# Build the signed AAB and (optionally) upload it to Google Play via Gradle Play
-# Publisher. Requires local.properties wired for signing and play-service-account.json
-# at the repo root (both git-ignored). No secrets in this file.
+# Single CLI entry point for a release. It only wraps the canonical, working paths —
+# Gradle for the build, the REST scripts for everything that talks to Play. There is
+# no Gradle Play Publisher here (its listing/publish/promote tasks fail with this
+# app and GPP is in maintenance mode — see issue #15 / play-publishing-research.md).
+#
+# Requires local.properties wired for signing (see docs/agent-references/deployment.md).
+# The publish/listing steps need an owner or CI/WIF token — scripts/lib/play-api.sh.
 #
 # Usage:
-#   scripts/release.sh build        # build the signed AAB only (default)
-#   scripts/release.sh listing      # push store listing text + graphics (no release)
-#   scripts/release.sh publish      # build + upload AAB to the internal track
-#   scripts/release.sh promote      # promote internal -> production (no rebuild)
+#   scripts/release.sh build      # build the signed AAB only (default)
+#   scripts/release.sh publish    # build + upload AAB to the internal track (REST)
+#   scripts/release.sh listing    # push store listing text + graphics (REST)
 #
-# Store listing/graphics live (versioned) under app/src/main/play/ — edit those
-# files then run `listing` to update the Play Store entry. Requires the SA to have
-# CAN_MANAGE_PUBLIC_LISTING on the app (see grant-app-publisher-sa.sh).
+# For production once the app has been published once: TRACK=production scripts/publish-internal.sh
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 case "${1:-build}" in
   build)   ./gradlew bundleRelease ;;
-  listing) ./gradlew publishListing ;;
-  publish) ./gradlew bundleRelease publishReleaseBundle ;;
-  promote) ./gradlew promoteArtifact --from-track internal --promote-track production ;;
-  *) echo "usage: $0 [build|listing|publish|promote]" >&2; exit 2 ;;
+  publish) ./gradlew bundleRelease && scripts/publish-internal.sh ;;
+  listing) scripts/upload-listing.sh ;;
+  *) echo "usage: $0 [build|publish|listing]" >&2; exit 2 ;;
 esac
