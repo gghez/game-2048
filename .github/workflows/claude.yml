@@ -6,22 +6,33 @@ on:
   pull_request_review_comment:
     types: [created]
   issues:
-    types: [opened, assigned]
+    types: [opened, assigned, labeled]
   pull_request_review:
     types: [submitted]
 
 jobs:
   claude:
+    # PUBLIC REPO HARDENING: only the repo owner may trigger Claude. Without this
+    # gate, anyone could drive the agent (and reach our secrets) by commenting
+    # "@claude" or, if they ever gained triage rights, by applying the label.
+    # github.actor is the user who caused the event (commenter / labeler / opener).
+    # Trigger paths: "@claude" in a comment/review/issue, OR the "claude" label
+    # added to an issue (label => implement the issue end-to-end).
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      github.actor == 'gghez' && (
+        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+        (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'claude') ||
+        (github.event_name == 'issues' && github.event.action != 'labeled' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      )
     runs-on: ubuntu-latest
+    # Implementation mode: write access lets Claude create a branch, push commits
+    # and open a PR. The action creates branches under the "claude/" prefix.
     permissions:
-      contents: read
-      pull-requests: read
-      issues: read
+      contents: write
+      pull-requests: write
+      issues: write
       id-token: write
       actions: read # Required for Claude to read CI results on PRs
     steps:
@@ -36,16 +47,17 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
+          # Adding the "claude" label to an issue triggers an implementation run.
+          label_trigger: "claude"
+
           # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
             actions: read
 
-          # Optional: Give a custom prompt to Claude. If this is not specified, Claude will perform the instructions specified in the comment that tagged it.
-          # prompt: 'Update the pull request description to include a summary of changes.'
-
-          # Pin Opus 4.8 at high reasoning effort for implementation work.
-          # See https://code.claude.com/docs/en/cli-reference for available options.
+          # Opus 4.8 at high effort. --allowed-tools is ADDITIVE (base GitHub +
+          # file tools always stay on); Bash is off by default, so we opt into a
+          # scoped set (build/test, git, gh) — narrow blast radius on a public repo.
           claude_args: |
             --model claude-opus-4-8
             --effort high
-
+            --allowed-tools "Bash(./gradlew *),Bash(git *),Bash(gh pr *),Bash(gh issue *)"
