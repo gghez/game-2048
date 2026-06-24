@@ -28,9 +28,16 @@
 
 - **Release signing** (issue #1): `signingConfigs.release` in `app/build.gradle.kts`,
   credentials read from `local.properties` (`RELEASE_STORE_FILE`,
-  `RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`). When those
-  are absent the release build is simply unsigned, so CI/local builds still work.
-  `*.jks` is git-ignored. **The upload keystore has been generated** (RSA 2048,
+  `RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`).
+  **Releases are CI-only (tag-driven).** The release workflow always writes these
+  signing props (plus `VERSION_CODE`/`VERSION_NAME`) into `local.properties` before
+  building, so a real release is always signed and correctly versioned. If a release
+  task is requested **without** those props (issue #31), the build now **fails fast**
+  with `GradleException("Release signing not configured: …")` instead of silently
+  producing an unsigned AAB. The guard is gated on the resolved task graph
+  (`gradle.taskGraph.whenReady`, matching `assemble*/bundle*/package*Release`), so
+  `assembleDebug`, `testDebugUnitTest`, and any other non-release task are never
+  affected. `*.jks` is git-ignored. **The upload keystore has been generated** (RSA 2048,
   alias `game2048`, validity ~27 years) and kept outside the repo under the owner's
   home dir; its credentials live in `.store-passwd` at the repo root (git-ignored)
   and are mirrored into `local.properties`. A signed AAB builds with
@@ -47,6 +54,14 @@
   (`icon-source.png`, `play-icon-512.png`, `play-feature-1024x500.png`). Manifest
   references `@mipmap/ic_launcher` + `@mipmap/ic_launcher_round`. Replace with real
   art when available.
+- **R8 minification + resource shrinking** (issue #29): the `release` build type sets
+  `isMinifyEnabled = true` and `isShrinkResources = true`. This drops the unused
+  `material-icons-extended` graph and obfuscates the AAB — release size fell from
+  ~11.5 MB to ~2.8 MB (~75%). Keep rules live in `app/proguard-rules.pro`; the only
+  explicit ones make the enum reflection surfaces (`GameStatus.valueOf`,
+  `ThemeMode.valueOf`) belt-and-suspenders safe (R8 already keeps enum
+  `values()`/`valueOf()` by default). Compose/Material3/DataStore/play-services-games
+  ship their own consumer rules, so nothing else is needed.
 - **Privacy policy** (issue #4): `docs/privacy.md`, hosted on GitHub Pages.
 
 ## Cloud / external resources (created)

@@ -38,8 +38,8 @@ android {
     }
     signingConfigs {
         // Release signing is configured only when local.properties provides the
-        // upload keystore. Otherwise the "release" config is absent and a release
-        // build stays unsigned (fine for local checks / CI without secrets).
+        // upload keystore. Otherwise the "release" config is absent; the release
+        // build type then fails fast (see below) so we never ship an unsigned AAB.
         val ksPath = localProps.getProperty("RELEASE_STORE_FILE")
         if (ksPath != null) create("release") {
             storeFile = file(ksPath)
@@ -51,7 +51,10 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.findByName("release")
-            isMinifyEnabled = false
+            // R8 full-mode minification + resource shrinking: drops the unused
+            // material-icons-extended graph and obfuscates the release AAB.
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -64,6 +67,28 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
     buildFeatures { compose = true }
+}
+
+// Fail fast on an unsigned release. Releases are CI-only (tag-driven): CI always
+// writes the signing props into local.properties, so a missing "release" signing
+// config means a misconfigured release attempt — never ship an unsigned AAB.
+// Guard on the resolved task graph so debug builds, unit tests, and any non-release
+// task (assembleDebug, testDebugUnitTest, …) are never affected.
+gradle.taskGraph.whenReady {
+    val buildsRelease = allTasks.any { task ->
+        task.project == project &&
+            (task.name.contains("Release") &&
+                (task.name.startsWith("assemble") ||
+                    task.name.startsWith("bundle") ||
+                    task.name.startsWith("package")))
+    }
+    if (buildsRelease && android.signingConfigs.findByName("release") == null) {
+        throw GradleException(
+            "Release signing not configured: set RELEASE_STORE_FILE/" +
+                "RELEASE_STORE_PASSWORD/RELEASE_KEY_ALIAS/RELEASE_KEY_PASSWORD in " +
+                "local.properties — releases are CI-only (tag-driven)",
+        )
+    }
 }
 
 dependencies {
