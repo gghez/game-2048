@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # Upload the signed AAB and create a release on a testing track (default: internal)
 # via the Publisher API, then commit. The app stays private to the track's testers —
-# nothing public. No secrets here.
+# nothing public. No secrets here. This is the canonical upload path (D2 in issue
+# #15): a single REST call sequence, no Gradle Play Publisher.
 #
-# Why not Gradle Play Publisher: GPP commits with changesNotSentForReview, which
-# this app rejects; and the service account's :commit returns 403. So we use the
-# REST API directly with an OWNER androidpublisher token and commit without that
-# param (see scripts/README.md for the ADC login).
+# Why REST and not GPP: GPP commits with changesNotSentForReview, which this app
+# rejects (400). The token rule (owner vs CI/WIF) lives in scripts/lib/play-api.sh.
 #
 # Env (from .store-passwd or environment):
 #   GCP_PROJECT, PACKAGE_NAME (default com.gghez.game2048)
@@ -16,17 +15,16 @@
 # ("Only releases with status draft may be created on draft app") — do the first
 # production publish via the Console; testing tracks accept 'completed'.
 set -euo pipefail
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-# shellcheck disable=SC1091
-[ -f "$ROOT/.store-passwd" ] && source "$ROOT/.store-passwd"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/play-api.sh"
+play_load_env
+play_api_init
+ROOT="$PLAY_REPO_ROOT"
 PKG="${PACKAGE_NAME:-com.gghez.game2048}"
 TRACK="${TRACK:-internal}"
 AAB="${AAB_PATH:-$ROOT/app/build/outputs/bundle/release/app-release.aab}"
-TOKEN="${ACCESS_TOKEN:-$(gcloud auth application-default print-access-token)}"
 BASE="https://androidpublisher.googleapis.com/androidpublisher/v3/applications/$PKG"
 UP="https://androidpublisher.googleapis.com/upload/androidpublisher/v3/applications/$PKG"
-H=(-H "Authorization: Bearer $TOKEN")
-[ -n "${GCP_PROJECT:-}" ] && H+=(-H "x-goog-user-project: $GCP_PROJECT")
+H=("${PLAY_AUTH[@]}")
 
 [ -f "$AAB" ] || (cd "$ROOT" && ./gradlew bundleRelease)
 
