@@ -33,6 +33,10 @@ import java.util.Locale
 class MainActivity : ComponentActivity() {
 
     private var vm: GameViewModel? = null
+    // Silent sign-in needs an attached Activity, which only exists from onResume.
+    // Fire it once per process the first time we attach, so a relaunch of the
+    // Activity (e.g. config change) does not retrigger redundant sign-in attempts.
+    private var attemptedSilentSignIn = false
 
     // Apply the persisted in-app language before the UI inflates, so every launch
     // honours the user's choice. Empty tag = follow the system locale (no override).
@@ -102,7 +106,15 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        (application as Game2048App).container.leaderboard.attach(this)
+        val leaderboard = (application as Game2048App).container.leaderboard
+        leaderboard.attach(this)
+        // Trigger silent sign-in here (not in the ViewModel init): the Play Games v2
+        // client requires the Activity bound just above. NoopLeaderboard returns false
+        // and does nothing. Guarded so it runs at most once per process.
+        if (!attemptedSilentSignIn) {
+            attemptedSilentSignIn = true
+            lifecycleScope.launch { leaderboard.signInSilently() }
+        }
         vm?.resumeTimer()
     }
 

@@ -77,7 +77,8 @@ class GameViewModel(
             observeSettings()
             observeBest()
             startTimer()
-            leaderboard.signInSilently()
+            // Silent sign-in is triggered from MainActivity.onResume once the Play
+            // Games v2 client has an attached Activity (it has none here in init).
         }
     }
 
@@ -119,7 +120,10 @@ class GameViewModel(
 
     fun onSwipe(dir: Direction) {
         val current = _ui.value.state
-        if (current.status == GameStatus.LOST) return
+        // Ignore moves while a blocking overlay is up (game over or the win panel).
+        // After "Continue", continueAfterWin() flips status back to PLAYING with
+        // keepPlaying = true, so the WON guard only blocks while the win panel shows.
+        if (current.status == GameStatus.LOST || current.status == GameStatus.WON) return
         val result = engine.move(current, dir)
         if (!result.moved) return
         previous = current

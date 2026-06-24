@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -124,7 +125,17 @@ private fun BoxScope.Overlay(title: String, actions: @Composable () -> Unit) {
         Modifier
             .matchParentSize()
             .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.85f)),
+            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.85f))
+            // Swallow every pointer event so taps and drags never reach the board
+            // behind the overlay. The action buttons sit above this Box and keep
+            // their own clicks; this only blocks the translucent backdrop area.
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        awaitPointerEvent().changes.forEach { it.consume() }
+                    }
+                }
+            },
         contentAlignment = Alignment.Center,
     ) {
         Column(
