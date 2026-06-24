@@ -13,6 +13,13 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
+# Least privilege: publishing goes to Play via the service-account token, not the
+# GITHUB_TOKEN, so the workflow only needs read access to repo contents. When #15
+# migrates auth to OIDC / Workload Identity Federation this becomes
+# `contents: read` + `id-token: write`.
+permissions:
+  contents: read
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -47,7 +54,7 @@ jobs:
       - name: Restore upload keystore
         env:
           KEYSTORE_B64: ${{ secrets.UPLOAD_KEYSTORE_BASE64 }}
-        run: echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+        run: printf '%s' "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
 
       # local.properties carries signing creds + the Play Games / leaderboard ids
       # that get injected as string resources (resValue). Never committed.
