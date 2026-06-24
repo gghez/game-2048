@@ -52,6 +52,8 @@ purpose of this project and must be rejected.
 ## Where to look
 
 - Build & run: `README.md`.
+- Run on a visible emulator (WSL2/WSLg KVM + software GPU): the `run-emulator` skill
+  in `.claude/skills/run-emulator/`, backed by `scripts/run-emulator.sh`.
 - Detailed architecture and design decisions: `docs/ARCHITECTURE.md`.
 - Module-specific stances: nested `CLAUDE.md` in `domain/`, `data/`, `ui/`.
 - Path-scoped rules Claude must follow: `.claude/rules/`.
