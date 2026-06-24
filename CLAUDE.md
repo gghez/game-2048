@@ -47,7 +47,9 @@ purpose of this project and must be rejected.
 - Domain logic stays Android-free and unit-tested.
 - When you change anything deployment-related (signing, publishing, store assets,
   hosting, cloud resources), update `docs/agent-references/deployment.md` in the
-  same change. Never commit secrets to it.
+  same change. Never commit secrets to it, and keep it mechanism-only — no
+  time-variable values (specific release tags/versionCodes, edit/run ids, "last
+  verified" snapshots) that go stale and mislead the next release.
 
 ## Where to look
 

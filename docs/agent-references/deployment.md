@@ -5,6 +5,12 @@
 > `CLAUDE.md`). **Never put secrets here** — no keystore passwords, no service
 > account key contents, no absolute machine paths.
 >
+> **No time-variable values.** Do not record point-in-time identifiers that change
+> with every release — specific release tags (`vX.Y.Z`), versionCodes, edit/run ids,
+> "last verified" snapshots. Describe the *mechanism* (the tag→versionCode formula,
+> the track, the auth flow), never a snapshot that goes stale and misleads the next
+> release.
+>
 > Step-by-step CLI procedures live in the GitHub issues labelled `deployment`
 > (#1–#5). This file records what was actually done and what remains.
 >
@@ -173,10 +179,9 @@ notes were wrong; the real blockers were:
 
 Committing **sends the changes for review** (no draft mode here).
 
-**AAB release — done on the internal track.** v1 (versionCode 1) was uploaded and
-released `completed` on the `internal` track via `scripts/publish-internal.sh`
-(owner token). One more gotcha: **production rejects `completed` releases on a
-never-published ("draft") app** — `"Only releases with status draft may be created
+**AAB release — internal track.** AABs are uploaded and released `completed` on the
+`internal` track via `scripts/publish-internal.sh`. One more gotcha: **production
+rejects `completed` releases on a never-published ("draft") app** — `"Only releases with status draft may be created
 on draft app"`. Testing tracks (internal/alpha/beta) accept `completed`, so the
 first real publish goes through a testing track (or the first production publish is
 done in the Console). Internal testers are added by email list in the Console
@@ -202,7 +207,7 @@ exchanges the runner's GitHub OIDC token for a ~1h GCP token minted with the
 First production publish stays manual; promote internal → production in the Console.
 
 ```bash
-git tag v1.1.0 && git push origin v1.1.0   # triggers the release workflow
+git tag vX.Y.Z && git push origin vX.Y.Z   # triggers the release workflow
 ```
 
 **Required GitHub repo secrets** (Settings → Secrets and variables → Actions):
@@ -218,27 +223,20 @@ git tag v1.1.0 && git push origin v1.1.0   # triggers the release workflow
 
 There is **no `PLAY_SERVICE_ACCOUNT_JSON` secret** — WIF replaced the long-lived key.
 
-### Migration status (issue #15) — WIF cutover not yet verified
+### Keyless auth setup (WIF)
 
-The workflow was switched from the SA-key flow to WIF, but the live cutover needs
-three steps that require GCP access + a real release, in order:
+`scripts/setup-wif.sh` provisions, in the publishing GCP project, the pool + OIDC
+provider and the IAM binding that let GitHub Actions authenticate without a stored
+key. Two properties are load-bearing:
 
-1. **Create the WIF resources:** `scripts/setup-wif.sh` (pool + provider with the
-   mandatory `assertion.repository == 'gghez/game-2048'` condition + the
-   `roles/iam.workloadIdentityUser` binding on the SA), then record `WIF_PROVIDER`
-   in `.store-passwd` and push `WIF_PROVIDER` / `WIF_SERVICE_ACCOUNT` with
-   `scripts/set-github-secrets.sh`.
-2. **Verify** by pushing a throwaway-patch tag and confirming the release job goes
-   green. **Watch for the self-impersonation trap:** the old SA-key `access_token`
-   path failed because the SA had to impersonate *itself*
-   (`iam.serviceAccounts.getAccessToken`). WIF should *not* reproduce it — the
-   federated principal (not the SA) holds `workloadIdentityUser` and mints the
-   token — but this is the one thing to confirm before trusting the new path.
-3. **Once green,** delete the now-unused `PLAY_SERVICE_ACCOUNT_JSON` GitHub secret
-   and any local `play-service-account.json`. Until then the old secret lingers
-   harmlessly and the workflow can be reverted for rollback.
+- The provider carries the **mandatory attribute condition**
+  `assertion.repository == 'gghez/game-2048'`. GitHub shares one OIDC issuer across
+  every repo, so without this condition any repo's workflow could impersonate the SA.
+- The SA is bound via `roles/iam.workloadIdentityUser` scoped to the repository
+  attribute (least privilege). That role includes `iam.serviceAccounts.getAccessToken`,
+  so the **federated principal — not the SA itself — mints the token**; the SA never
+  self-impersonates (which is why the IAM Credentials self-impersonation failure that
+  blocks the SA-key `access_token` format does not apply here).
 
-**Previously verified (SA-key path, superseded):** tag `v1.1.0` built and released
-versionCode 10100 on the internal track (`committed edit …`). The SA's `:commit`
-works with the per-app grant; the earlier `403` was the store-listing review commit,
-a different operation.
+The script prints `WIF_PROVIDER` / `WIF_SERVICE_ACCOUNT`; record `WIF_PROVIDER` in
+`.store-passwd` and push both with `scripts/set-github-secrets.sh`.
