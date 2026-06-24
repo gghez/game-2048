@@ -13,12 +13,13 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
-# Least privilege: publishing goes to Play via the service-account token, not the
-# GITHUB_TOKEN, so the workflow only needs read access to repo contents. When #15
-# migrates auth to OIDC / Workload Identity Federation this becomes
-# `contents: read` + `id-token: write`.
+# Least privilege: publishing goes to Play via a short-lived, Workload-Identity-
+# Federation-minted token (keyless — no SA key stored), not the GITHUB_TOKEN.
+# `id-token: write` lets the runner mint the GitHub OIDC token that WIF exchanges
+# for a ~1h GCP token; `contents: read` is all the repo access we need.
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   release:
@@ -91,19 +92,23 @@ jobs:
       - name: Build signed AAB
         run: ./gradlew bundleRelease
 
-      # Mint an Android Publisher access token straight from the SA key (JWT flow
-      # via gcloud, preinstalled on the runner). This avoids the IAM Credentials
-      # API / self-impersonation that google-github-actions/auth's access_token
-      # format requires. The token stays inside this step and feeds the proven
-      # REST publish path (no changesNotSentForReview).
+      # Keyless auth: GitHub's OIDC token is exchanged (WIF) for a ~1h GCP token,
+      # minted directly with the androidpublisher scope. WIF_PROVIDER / WIF_SERVICE_ACCOUNT
+      # are repo secrets (they carry the project number / SA email — never committed).
+      # Set them with scripts/setup-wif.sh + scripts/set-github-secrets.sh.
+      - name: Authenticate to Google (Workload Identity Federation, keyless)
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/androidpublisher
+
+      # The minted token feeds the canonical REST publish path (no changesNotSentForReview).
       - name: Release on internal track
         env:
-          SA_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
           TRACK: internal
           AAB_PATH: app/build/outputs/bundle/release/app-release.aab
-        run: |
-          printf '%s' "$SA_JSON" > "$RUNNER_TEMP/sa.json"
-          gcloud auth activate-service-account --key-file="$RUNNER_TEMP/sa.json"
-          ACCESS_TOKEN="$(gcloud auth print-access-token \
-            --scopes=https://www.googleapis.com/auth/androidpublisher)" \
-            bash scripts/publish-internal.sh
+        run: bash scripts/publish-internal.sh
