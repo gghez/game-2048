@@ -106,9 +106,15 @@ jobs:
           access_token_scopes: https://www.googleapis.com/auth/androidpublisher
 
       # The minted token feeds the canonical REST publish path (no changesNotSentForReview).
+      # Blank GCP_PROJECT: google-github-actions/auth exports it, which would make the
+      # script send `x-goog-user-project` and trigger a serviceusage permission check
+      # the publisher SA lacks (403). The proven SA-key path sent no such header — this
+      # keeps the WIF path byte-identical to it at the HTTP level. androidpublisher
+      # access is governed by the Play Console grant, not the quota project.
       - name: Release on internal track
         env:
           ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          GCP_PROJECT: ""
           TRACK: internal
           AAB_PATH: app/build/outputs/bundle/release/app-release.aab
         run: bash scripts/publish-internal.sh
