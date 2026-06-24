@@ -51,12 +51,12 @@ jobs:
           label_trigger: "claude"
 
           # Public-repo hardening: the issue/PR comment thread is fed to Claude as
-          # context. Restrict that context to the owner's comments and drop bots,
-          # so third-party comments cannot inject instructions. (NOTE: the issue
-          # title/body are always included regardless of author — only label
-          # issues whose body you trust.)
+          # context. Restrict that context to the owner's comments so third-party
+          # comments cannot inject instructions. A non-empty include list is a
+          # strict allowlist (everything else, bots included, is dropped). (NOTE:
+          # the issue title/body are always included regardless of author — only
+          # label issues whose body you trust.)
           include_comments_by_actor: "gghez"
-          exclude_comments_by_actor: "*[bot]"
 
           # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
