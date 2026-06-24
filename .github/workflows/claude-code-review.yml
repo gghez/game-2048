@@ -42,9 +42,10 @@ jobs:
           # so third-party comments cannot inject instructions. A non-empty
           # include list is a strict allowlist (everything else is dropped).
           include_comments_by_actor: "gghez"
-          # Pin Opus 4.8 at high reasoning effort for reviews.
+          # Pin Opus 4.8 at xhigh reasoning effort for reviews (deeper bug-finding;
+          # xhigh is the coding/agentic sweet spot on 4.8 and the Claude Code default).
           # See https://code.claude.com/docs/en/cli-reference for available options.
           claude_args: |
             --model claude-opus-4-8
-            --effort high
+            --effort xhigh
 

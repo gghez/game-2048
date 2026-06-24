@@ -62,7 +62,8 @@ jobs:
           additional_permissions: |
             actions: read
 
-          # Opus 4.8 at high effort. --allowed-tools is ADDITIVE (base GitHub +
+          # Opus 4.8 at xhigh effort (sweet spot for coding/agentic on 4.8, the
+          # default in Claude Code). --allowed-tools is ADDITIVE (base GitHub +
           # file tools always stay on); Bash is off by default, so we opt into a
           # scoped set. READ-ONLY git/gh on purpose: branch creation, commits and
           # PR opening go through the action's native tools, so Claude never needs
@@ -70,5 +71,5 @@ jobs:
           # direct `git push ...:main` — while keeping ./gradlew for build/test.
           claude_args: |
             --model claude-opus-4-8
-            --effort high
+            --effort xhigh
             --allowed-tools "Bash(./gradlew *),Bash(git status *),Bash(git diff *),Bash(git log *),Bash(gh pr view *),Bash(gh pr diff *),Bash(gh issue view *)"
