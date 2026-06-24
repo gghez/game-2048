@@ -8,9 +8,6 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-import kotlin.math.PI
-import kotlin.math.exp
-import kotlin.math.sin
 
 /** Haptic + audio feedback for board events. Each call is gated by user settings. */
 interface GameFeedback {
@@ -22,10 +19,10 @@ interface GameFeedback {
 /**
  * Android implementation.
  *
- * Sound is synthesized in-process (a short decaying sine "click") and played via
- * [AudioTrack], so the app ships no audio assets. Tracks are created lazily on first
- * use, so nothing is allocated when sound stays off. Vibration uses the platform
- * Vibrator with a one-shot effect (with a pre-API-26 fallback).
+ * Sound is synthesized in-process by the pure [Synth] (no audio assets) and played via
+ * [AudioTrack]. Tracks are created lazily on first use, so nothing is allocated when
+ * sound stays off. Vibration uses the platform Vibrator with a one-shot effect (with a
+ * pre-API-26 fallback).
  */
 class AndroidGameFeedback(context: Context) : GameFeedback {
 
@@ -46,12 +43,12 @@ class AndroidGameFeedback(context: Context) : GameFeedback {
 
     override fun onMove(vibrate: Boolean, sound: Boolean) {
         if (vibrate) vibrate(MOVE_VIBRATION_MS)
-        if (sound) play(moveTrack ?: buildClick(MOVE_FREQ, MOVE_DURATION_MS).also { moveTrack = it })
+        if (sound) play(moveTrack ?: buildTrack(MOVE_SPEC).also { moveTrack = it })
     }
 
     override fun onMerge(vibrate: Boolean, sound: Boolean) {
         if (vibrate) vibrate(MERGE_VIBRATION_MS)
-        if (sound) play(mergeTrack ?: buildClick(MERGE_FREQ, MERGE_DURATION_MS).also { mergeTrack = it })
+        if (sound) play(mergeTrack ?: buildTrack(MERGE_SPEC).also { mergeTrack = it })
     }
 
     override fun release() {
@@ -78,16 +75,9 @@ class AndroidGameFeedback(context: Context) : GameFeedback {
         runCatching { track.play() }
     }
 
-    /** Builds a static AudioTrack holding a short decaying-sine click. */
-    private fun buildClick(freq: Double, durationMs: Int): AudioTrack {
-        val count = SAMPLE_RATE * durationMs / 1000
-        val samples = ShortArray(count)
-        for (i in 0 until count) {
-            val t = i.toDouble() / SAMPLE_RATE
-            val envelope = exp(-t * DECAY)
-            val value = sin(2.0 * PI * freq * t) * envelope * AMPLITUDE
-            samples[i] = (value * Short.MAX_VALUE).toInt().toShort()
-        }
+    /** Wraps a [Synth]-rendered PCM buffer in a static [AudioTrack] ready to replay. */
+    private fun buildTrack(spec: ToneSpec): AudioTrack {
+        val samples = Synth.render(spec, SAMPLE_RATE)
         val track = AudioTrack.Builder()
             .setAudioAttributes(
                 AudioAttributes.Builder()
@@ -111,12 +101,37 @@ class AndroidGameFeedback(context: Context) : GameFeedback {
 
     private companion object {
         const val SAMPLE_RATE = 44100
-        const val AMPLITUDE = 0.45
-        const val DECAY = 32.0
-        const val MOVE_FREQ = 660.0
-        const val MERGE_FREQ = 392.0
-        const val MOVE_DURATION_MS = 60
-        const val MERGE_DURATION_MS = 95
+
+        /**
+         * Move: a soft, low-mid tick. Low amplitude and a touch of 2nd harmonic keep it
+         * warm but unobtrusive, so it doesn't fatigue when it fires on every swipe.
+         */
+        val MOVE_SPEC = ToneSpec(
+            notes = listOf(Note(freqHz = 330.0, durationMs = 50)),
+            amplitude = 0.22,
+            attackMs = 4.0,
+            releaseMs = 10.0,
+            decay = 30.0,
+            harmonics = listOf(0.20),
+        )
+
+        /**
+         * Merge: a short ascending two-note blip (a perfect fifth, C5 → G5). It is louder
+         * and warmer than the move (richer harmonics, slower decay) and the upward step
+         * reads as "combine / level up" — clearly the reward cue.
+         */
+        val MERGE_SPEC = ToneSpec(
+            notes = listOf(
+                Note(freqHz = 523.25, durationMs = 55), // C5
+                Note(freqHz = 783.99, durationMs = 70), // G5
+            ),
+            amplitude = 0.40,
+            attackMs = 4.0,
+            releaseMs = 9.0,
+            decay = 18.0,
+            harmonics = listOf(0.25, 0.12),
+        )
+
         const val MOVE_VIBRATION_MS = 12L
         const val MERGE_VIBRATION_MS = 35L
     }
