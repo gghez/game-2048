@@ -30,14 +30,21 @@ PLAY_REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # Load git-ignored identifiers (GCP_PROJECT, PACKAGE_NAME, DEVELOPER_ID,
 # SERVICE_ACCOUNT_EMAIL, ...) without hard-coding any of them.
+# `return 0` is required: a bare `[ -f x ] && source x` returns 1 when the file is
+# absent (e.g. in CI, no .store-passwd), and as a function's last status that trips
+# `set -e` in the caller — killing the script before it does anything.
 play_load_env() {
   # shellcheck disable=SC1091
   [ -f "$PLAY_REPO_ROOT/.store-passwd" ] && source "$PLAY_REPO_ROOT/.store-passwd"
+  return 0
 }
 
 # Set PLAY_TOKEN (bearer) and PLAY_AUTH (curl -H args, incl. quota project header).
+# `return 0` for the same reason: the trailing `[ -n ... ] && ...` returns 1 when
+# GCP_PROJECT is unset, which would trip `set -e` in the caller.
 play_api_init() {
   PLAY_TOKEN="${ACCESS_TOKEN:-$(gcloud auth application-default print-access-token)}"
   PLAY_AUTH=(-H "Authorization: Bearer $PLAY_TOKEN")
   [ -n "${GCP_PROJECT:-}" ] && PLAY_AUTH+=(-H "x-goog-user-project: $GCP_PROJECT")
+  return 0
 }
