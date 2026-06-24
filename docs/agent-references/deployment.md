@@ -7,6 +7,10 @@
 >
 > Step-by-step CLI procedures live in the GitHub issues labelled `deployment`
 > (#1–#5). This file records what was actually done and what remains.
+>
+> For *why* the publishing stack is shaped this way (comparison of automation
+> approaches and the 2026 best-practice rationale), see
+> [`play-publishing-research.md`](play-publishing-research.md).
 
 ## App identity
 
