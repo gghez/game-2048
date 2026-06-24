@@ -64,11 +64,14 @@ jobs:
 
           # Opus 4.8 at high effort. --allowed-tools is ADDITIVE (base GitHub +
           # file tools always stay on); Bash is off by default, so we opt into a
-          # scoped set. READ-ONLY git/gh on purpose: branch creation, commits and
-          # PR opening go through the action's native tools, so Claude never needs
-          # write-Bash. This shuts both self-merge paths — `gh pr merge` and a
-          # direct `git push ...:main` — while keeping ./gradlew for build/test.
+          # scoped set. git is READ-ONLY and `gh pr` is limited to create/view/diff
+          # (NO merge, NO close) — combined with read-only git this blocks both
+          # self-merge paths (`gh pr merge`, direct `git push ...:main`) while
+          # letting Claude open (but never merge) a PR. ./gradlew for build/test.
+          # --append-system-prompt makes Claude open the PR itself after pushing,
+          # only when it actually implemented an issue on a fresh branch.
           claude_args: |
             --model claude-opus-4-8
             --effort high
-            --allowed-tools "Bash(./gradlew *),Bash(git status *),Bash(git diff *),Bash(git log *),Bash(gh pr view *),Bash(gh pr diff *),Bash(gh issue view *)"
+            --allowed-tools "Bash(./gradlew *),Bash(git status *),Bash(git diff *),Bash(git log *),Bash(gh pr create *),Bash(gh pr view *),Bash(gh pr diff *),Bash(gh issue view *)"
+            --append-system-prompt "When your task was to implement a GitHub issue and you created a new branch with code changes, after committing and pushing open a pull request against the base branch using 'gh pr create' (derive the title/body from the issue and reference it). Never merge or close the PR — leave it for the owner to review and merge. If you are only answering a question or already operating inside an existing pull request, do not create a new PR."
