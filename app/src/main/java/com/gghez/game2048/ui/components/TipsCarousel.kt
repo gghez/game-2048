@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gghez.game2048.R
@@ -56,10 +57,10 @@ fun TipsCarousel(fastAnimations: Boolean, modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .border(1.dp, border, RoundedCornerShape(12.dp))
-            .heightIn(min = 64.dp),
+            .heightIn(min = 48.dp),
     ) { i ->
         Row(
-            modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp),
+            modifier = Modifier.padding(vertical = 6.dp, horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -73,6 +74,14 @@ fun TipsCarousel(fastAnimations: Boolean, modifier: Modifier = Modifier) {
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f),
+                // Reserve a constant two-line height so the card never resizes as tips
+                // rotate: a one-line tip and a two-line tip would otherwise give the card
+                // different heights and shift the score row + board below it. Two lines fit
+                // the longest tip in every locale at normal widths; anything longer at very
+                // narrow widths ellipsizes rather than growing the card.
+                minLines = 2,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }

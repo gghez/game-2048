@@ -41,10 +41,11 @@ import com.gghez.game2048.ui.components.ScoreCard
 import com.gghez.game2048.ui.components.TipsCarousel
 
 /**
- * Portrait layout, bottom-anchored for thumb reach: header (title + actions) and a
- * rotating tips card sit at the top; a flexible spacer then pushes the score row,
- * the square board (sized to the available width) and the footer (timer, undo, move
- * count) down to the bottom of the screen.
+ * Portrait layout, bottom-anchored for thumb reach: the header and the rotating tips card
+ * sit at the top; a flexible spacer then pushes the score row, the full-width square board
+ * and the footer (timer, undo, move count) to the bottom. The board is ALWAYS full board
+ * width and never shrinks — the tips and score blocks are sized down instead so everything
+ * fits above the system bars on short screens.
  */
 @Composable
 fun GameScreen(
@@ -73,17 +74,21 @@ fun GameScreen(
             IconButton(onClick = onOpenSettings) { Icon(Icons.Default.Settings, stringResource(R.string.cd_settings)) }
         }
         Spacer(Modifier.height(8.dp))
-        // Tips carousel fills the freed-up upper area
+        // Rotating tips card (fixed two-line height — never reflows the layout).
         TipsCarousel(fastAnimations = ui.settings.fastAnimations)
-        // Flexible space pushes the score/board/footer block to the bottom (thumb reach)
+        // Fixed gap keeps the tips card off the score row even when the flexible space
+        // collapses on a short screen; the weight below then bottom-anchors the score row,
+        // board and footer for thumb reach on taller screens.
+        Spacer(Modifier.height(12.dp))
         Spacer(Modifier.weight(1f))
-        // Score row (stuck just above the board)
+        // Score row
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             ScoreCard(stringResource(R.string.score), ui.state.score, highlighted = true, modifier = Modifier.weight(1f))
             ScoreCard(stringResource(R.string.best_score), ui.bestScore, highlighted = false, modifier = Modifier.weight(1f))
         }
-        Spacer(Modifier.height(8.dp))
-        // Grid with win/over overlay
+        Spacer(Modifier.height(10.dp))
+        // Board — ALWAYS full board width (square). It never shrinks: the tips and score
+        // blocks above are sized down instead so the whole column fits above the system bars.
         Box(Modifier.fillMaxWidth()) {
             GameGrid(
                 board = ui.state.board,
@@ -103,7 +108,7 @@ fun GameScreen(
                 GameStatus.PLAYING -> {}
             }
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(10.dp))
         // Footer
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(formatTime(ui.elapsedSeconds), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
