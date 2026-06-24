@@ -12,7 +12,7 @@
     <string name="new_game_title">Neues Spiel</string>
     <string name="new_game_body">Möchtest du wirklich ein neues Spiel starten? Das aktuelle Spiel geht dauerhaft verloren.</string>
     <string name="start">START</string>
-    <string name="cancel">CANCEL</string>
+    <string name="cancel">Abbrechen</string>
     <!-- Settings -->
     <string name="settings_title">Einstellungen</string>
     <string name="theme_light">Helles Design</string>

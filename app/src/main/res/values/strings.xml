@@ -2,6 +2,7 @@
     <string name="app_name">2exp11</string>
 
     <!-- Score row -->
+    <!-- Intentionally kept as short EN all-caps labels in every locale (stylistic, do not translate). -->
     <string name="score">SCORE</string>
     <string name="best_score">BEST SCORE</string>
     <string name="moves_suffix">MOVES</string>
